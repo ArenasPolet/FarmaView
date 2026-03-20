@@ -268,54 +268,59 @@ window.guardarInstitucionRapido = function(url, csrf) {
     .catch(err => console.error("Error en fetch contacto:", err));
 };
   
-// --- Dictado por voz (Versión Pro) ---
+// --- Dictado por voz (Versión Escritura en Vivo) ---
 window.iniciarDictado = function() {
-    // Verificamos soporte (añadimos la versión estándar y la de webkit)
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
-        // Ajustamos el idioma (es-CL suele detectar mejor los modismos y acentos locales)
         recognition.lang = "es-CL"; 
+        recognition.continuous = false; 
+        recognition.interimResults = true; // ✨ LA MAGIA: Muestra los resultados en tiempo real
         
-        // Capturamos el botón y el textarea
         const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
         const textarea = document.getElementById('notas_textarea');
-        const contenidoOriginal = btnDictar.innerHTML; // Guardamos cómo se veía el botón
+        const contenidoOriginal = btnDictar.innerHTML; 
+        
+        let textoGuardado = textarea.value; // Guardamos lo que ya estaba escrito en la caja
 
-        // 1. ¿Qué pasa cuando empieza a escuchar?
         recognition.onstart = function() {
-            // Cambiamos el botón para avisar que está grabando
             btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-danger"></i> Escuchando...';
-            btnDictar.style.borderColor = "#ffcccc";
+            btnDictar.style.color = "#dc3545"; // Se pone rojo para avisar que está grabando
         };
 
-        // 2. ¿Qué pasa cuando detecta la voz?
+        // Esta función ahora se dispara cada vez que dices una palabra
         recognition.onresult = function(event) { 
-            const textoDictado = event.results[0][0].transcript;
-            // Solo agrega un espacio si ya había texto antes, para no dejar espacios vacíos al inicio
-            textarea.value += (textarea.value.length > 0 ? " " : "") + textoDictado; 
-        };
-
-        // 3. ¿Qué pasa cuando termina de escuchar?
-        recognition.onend = function() {
-            // Restauramos el botón a su estado normal
-            btnDictar.innerHTML = contenidoOriginal;
-            btnDictar.style.borderColor = "";
-        };
-
-        // 4. ¿Qué pasa si el usuario no dio permisos de micrófono?
-        recognition.onerror = function(event) {
-            if (event.error === 'not-allowed') {
-                alert("Por favor, permite el acceso al micrófono en tu navegador para usar esta función.");
+            let textoTemporal = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    // Si terminó la frase, la guarda permanentemente
+                    textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
+                } else {
+                    // Si sigue hablando, lo muestra temporalmente
+                    textoTemporal += event.results[i][0].transcript;
+                }
             }
-            btnDictar.innerHTML = contenidoOriginal; // Restaurar botón
+            // Actualiza la caja de texto en vivo
+            textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
         };
 
-        // Iniciamos la magia
+        recognition.onend = function() {
+            btnDictar.innerHTML = contenidoOriginal;
+            btnDictar.style.color = ""; // Vuelve a la normalidad
+        };
+
+        recognition.onerror = function(event) {
+            console.error("Error del micrófono:", event.error);
+            if (event.error === 'not-allowed') {
+                alert("Debes permitir el acceso al micrófono en la barra de direcciones (candado) y usar HTTPS.");
+            }
+            btnDictar.innerHTML = contenidoOriginal; 
+        };
+
         recognition.start();
 
     } else { 
-        alert("Tu navegador actual no soporta el dictado por voz. Te recomendamos usar Google Chrome."); 
+        alert("Tu navegador actual no soporta el dictado por voz. Usa Safari o Google Chrome actualizados."); 
     }
 };

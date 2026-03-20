@@ -269,65 +269,70 @@ window.guardarInstitucionRapido = function(url, csrf) {
 };
   
 
-// --- Dictado por voz (Estilo WhatsApp: Diseño Mejorado y Mantener presionado) ---
-// --- Dictado por voz (Estilo Interruptor: 1 toque enciende, 1 toque apaga) ---
-document.addEventListener('DOMContentLoaded', function() {
+// --- Dictado por voz (Estilo Interruptor Seguro) ---
+let recognitionGlobal;
+let dictadoGrabando = false;
+let textoGuardadoGlobal = "";
+let contenidoBotonOriginal = "";
+
+window.toggleDictado = function() {
     const btnDictar = document.getElementById('btn_dictar');
     const textarea = document.getElementById('notas_textarea');
 
-    if (btnDictar && textarea) {
+    // 1. Si es la primera vez que lo tocamos, configuramos el micrófono
+    if (!recognitionGlobal) {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
+            recognitionGlobal = new SpeechRecognition();
             
-            recognition.lang = "es-CL"; 
-            recognition.continuous = true; 
-            recognition.interimResults = true; 
-            
-            let grabando = false; // <-- Controla si está encendido o apagado
-            let textoGuardado = "";
-            let contenidoOriginal = btnDictar.innerHTML; 
+            recognitionGlobal.lang = "es-CL"; 
+            recognitionGlobal.continuous = true; 
+            recognitionGlobal.interimResults = true; 
 
-            recognition.onstart = function() {
-                grabando = true;
-                // Se pone rojo y avisa que puedes tocar para detener
+            recognitionGlobal.onstart = function() {
+                dictadoGrabando = true;
+                contenidoBotonOriginal = btnDictar.innerHTML; // Guardamos el diseño azul
+                
+                // Cambia a rojo
                 btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-1 text-white fs-5"></i> <span class="small fw-bold text-white">Detener</span>';
                 btnDictar.style.backgroundColor = "#dc3545"; 
-                btnDictar.style.color = "white";
-                textoGuardado = textarea.value; 
+                textoGuardadoGlobal = textarea.value; 
             };
 
-            recognition.onresult = function(event) { 
+            recognitionGlobal.onresult = function(event) { 
                 let textoTemporal = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
+                        textoGuardadoGlobal += (textoGuardadoGlobal.length > 0 ? " " : "") + event.results[i][0].transcript;
                     } else {
                         textoTemporal += event.results[i][0].transcript;
                     }
                 }
-                textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
+                textarea.value = textoGuardadoGlobal + (textoTemporal ? " " + textoTemporal : ""); 
             };
 
-            recognition.onend = function() {
-                grabando = false;
-                // Vuelve a la normalidad (Fondo oscuro)
-                btnDictar.innerHTML = contenidoOriginal;
-                btnDictar.style.backgroundColor = ""; 
-            };
-
-            // --- LÓGICA DE 1 TOQUE (Funciona perfecto en PC y Celular) ---
-            btnDictar.onclick = function(e) {
-                e.preventDefault();
-                if (grabando) {
-                    recognition.stop(); // Si está rojo, lo apaga
-                } else {
-                    try { recognition.start(); } catch(err) {} // Si está azul, lo enciende
+            recognitionGlobal.onend = function() {
+                dictadoGrabando = false;
+                // Vuelve a azul
+                if (contenidoBotonOriginal) {
+                    btnDictar.innerHTML = contenidoBotonOriginal;
+                    btnDictar.style.backgroundColor = "#2b3a67"; 
                 }
             };
-
-        } else { 
-            btnDictar.onclick = () => alert("Tu navegador actual no soporta el dictado por voz."); 
+        } else {
+            alert("Tu celular no soporta esta función. Usa Chrome o Safari actualizados.");
+            return;
         }
     }
-});
+
+    // 2. Lógica de Encender / Apagar
+    if (dictadoGrabando) {
+        recognitionGlobal.stop(); // Si está grabando, lo apaga
+    } else {
+        try { 
+            recognitionGlobal.start(); // Si está apagado, lo enciende
+        } catch(err) {
+            console.error("Error al iniciar:", err);
+        }
+    }
+};

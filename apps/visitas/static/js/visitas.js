@@ -269,70 +269,57 @@ window.guardarInstitucionRapido = function(url, csrf) {
 };
   
 
-// --- Dictado por voz (Estilo Interruptor Seguro) ---
-let recognitionGlobal;
-let dictadoGrabando = false;
-let textoGuardadoGlobal = "";
-let contenidoBotonOriginal = "";
+// --- Dictado por voz (VERSIÓN ORIGINAL QUE FUNCIONA EN CELULAR) ---
+window.miReconocimiento = null;
+window.estaGrabando = false;
 
-window.toggleDictado = function() {
-    const btnDictar = document.getElementById('btn_dictar');
+window.iniciarDictado = function() {
+    const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
     const textarea = document.getElementById('notas_textarea');
-
-    // 1. Si es la primera vez que lo tocamos, configuramos el micrófono
-    if (!recognitionGlobal) {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognitionGlobal = new SpeechRecognition();
-            
-            recognitionGlobal.lang = "es-CL"; 
-            recognitionGlobal.continuous = true; 
-            recognitionGlobal.interimResults = true; 
-
-            recognitionGlobal.onstart = function() {
-                dictadoGrabando = true;
-                contenidoBotonOriginal = btnDictar.innerHTML; // Guardamos el diseño azul
-                
-                // Cambia a rojo
-                btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-1 text-white fs-5"></i> <span class="small fw-bold text-white">Detener</span>';
-                btnDictar.style.backgroundColor = "#dc3545"; 
-                textoGuardadoGlobal = textarea.value; 
-            };
-
-            recognitionGlobal.onresult = function(event) { 
-                let textoTemporal = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        textoGuardadoGlobal += (textoGuardadoGlobal.length > 0 ? " " : "") + event.results[i][0].transcript;
-                    } else {
-                        textoTemporal += event.results[i][0].transcript;
-                    }
-                }
-                textarea.value = textoGuardadoGlobal + (textoTemporal ? " " + textoTemporal : ""); 
-            };
-
-            recognitionGlobal.onend = function() {
-                dictadoGrabando = false;
-                // Vuelve a azul
-                if (contenidoBotonOriginal) {
-                    btnDictar.innerHTML = contenidoBotonOriginal;
-                    btnDictar.style.backgroundColor = "#2b3a67"; 
-                }
-            };
-        } else {
-            alert("Tu celular no soporta esta función. Usa Chrome o Safari actualizados.");
-            return;
-        }
+    
+    // Si ya está grabando y tocamos el botón, lo apagamos y salimos
+    if (window.estaGrabando && window.miReconocimiento) {
+        window.miReconocimiento.stop();
+        return;
     }
 
-    // 2. Lógica de Encender / Apagar
-    if (dictadoGrabando) {
-        recognitionGlobal.stop(); // Si está grabando, lo apaga
-    } else {
-        try { 
-            recognitionGlobal.start(); // Si está apagado, lo enciende
-        } catch(err) {
-            console.error("Error al iniciar:", err);
-        }
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        window.miReconocimiento = new SpeechRecognition();
+        
+        window.miReconocimiento.lang = "es-CL"; 
+        window.miReconocimiento.continuous = true; // El que te funcionó en el celular
+        window.miReconocimiento.interimResults = true; 
+        
+        let textoGuardado = textarea.value; 
+
+        window.miReconocimiento.onstart = function() {
+            window.estaGrabando = true;
+            btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-2 text-danger"></i> DETENER';
+            btnDictar.style.color = "#dc3545"; 
+        };
+
+        window.miReconocimiento.onresult = function(event) { 
+            let textoTemporal = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
+                } else {
+                    textoTemporal += event.results[i][0].transcript;
+                }
+            }
+            textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
+        };
+
+        window.miReconocimiento.onend = function() {
+            window.estaGrabando = false;
+            btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2"></i>DICTAR NOTA';
+            btnDictar.style.color = ""; 
+        };
+
+        window.miReconocimiento.start();
+
+    } else { 
+        alert("Tu navegador actual no soporta el dictado por voz."); 
     }
 };

@@ -229,9 +229,8 @@
                         </label>
                         <div class="position-relative">
                             <textarea name="notas" id="notas_textarea" class="form-control border-0 bg-light p-3" rows="4" style="border-radius: 15px; padding-bottom: 60px;" placeholder="{% translate 'Escriba detalles sobre la visita...' %}"></textarea>
-                           <button type="button" id="btn_dictar" onclick="toggleDictado()" class="btn btn-primary shadow-lg position-absolute bottom-0 end-0 m-3 rounded-pill px-4 py-2 border-0" style="background-color: #2b3a67; z-index: 10;">
-                                <i class="bi bi-mic-fill me-1 text-white fs-5"></i> 
-                                <span class="small fw-bold text-white">Dictar</span>
+                           <button type="button" onclick="iniciarDictado()" class="btn btn-light shadow-sm btn-sm position-absolute bottom-0 end-0 m-3 rounded-pill px-3 border" style="background-color: #edf2ff; color: #2b3a67;">
+                                <i class="bi bi-mic-fill me-2"></i>DICTAR NOTA
                             </button>
                         </div>
                     </div>

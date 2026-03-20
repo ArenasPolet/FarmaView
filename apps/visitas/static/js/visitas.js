@@ -268,60 +268,73 @@ window.guardarInstitucionRapido = function(url, csrf) {
     .catch(err => console.error("Error en fetch contacto:", err));
 };
   
-// --- Dictado por voz (Versión Continua + Rastreador de errores) ---
-window.iniciarDictado = function() {
-    console.log("1. Botón presionado. Iniciando...");
-    
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        
-        recognition.lang = "es-CL"; 
-        recognition.continuous = true; // 🔴 CAMBIO CLAVE: Ahora no se apagará a la primera pausa
-        recognition.interimResults = true; 
-        
-        const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
-        const textarea = document.getElementById('notas_textarea');
-        const contenidoOriginal = btnDictar.innerHTML; 
-        
-        let textoGuardado = textarea.value; 
+// --- Dictado por voz (Estilo WhatsApp: Mantener presionado) ---
+document.addEventListener('DOMContentLoaded', function() {
+    const btnDictar = document.getElementById('btn_dictar');
+    const textarea = document.getElementById('notas_textarea');
 
-        recognition.onstart = function() {
-            console.log("2. Micrófono encendido. Habla ahora...");
-            btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-danger"></i> Escuchando...';
-            btnDictar.style.color = "#dc3545"; 
-        };
+    if (btnDictar && textarea) {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = "es-CL"; 
+            recognition.continuous = true; 
+            recognition.interimResults = true; 
+            
+            let textoGuardado = "";
+            let contenidoOriginal = btnDictar.innerHTML;
 
-        recognition.onresult = function(event) { 
-            console.log("3. ¡Te escuché! Procesando voz...");
-            let textoTemporal = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
-                } else {
-                    textoTemporal += event.results[i][0].transcript;
+            recognition.onstart = function() {
+                // Al presionar: Cambia a rojo y dice Grabando
+                btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-white"></i> Grabando...';
+                btnDictar.style.backgroundColor = "#dc3545"; 
+                btnDictar.style.color = "white";
+                textoGuardado = textarea.value; 
+            };
+
+            recognition.onresult = function(event) { 
+                let textoTemporal = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
+                    } else {
+                        textoTemporal += event.results[i][0].transcript;
+                    }
                 }
-            }
-            textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
-        };
+                textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
+            };
 
-        recognition.onend = function() {
-            console.log("4. El micrófono se ha apagado.");
-            btnDictar.innerHTML = contenidoOriginal;
-            btnDictar.style.color = ""; 
-        };
+            recognition.onend = function() {
+                // Al soltar: Vuelve a la normalidad
+                btnDictar.innerHTML = contenidoOriginal;
+                btnDictar.style.backgroundColor = "#edf2ff";
+                btnDictar.style.color = "#2b3a67";
+            };
 
-        recognition.onerror = function(event) {
-            console.error("🚨 ERROR DETECTADO:", event.error);
-            if (event.error === 'not-allowed') {
-                alert("Debes permitir el micrófono.");
-            }
-            btnDictar.innerHTML = contenidoOriginal; 
-        };
+            // --- LÓGICA DE PRESIONAR Y SOLTAR ---
+            const iniciarGrabacion = (e) => {
+                e.preventDefault(); 
+                try { recognition.start(); } catch(err) {}
+            };
 
-        recognition.start();
+            const detenerGrabacion = (e) => {
+                e.preventDefault();
+                recognition.stop(); // 🛑 Apaga el micrófono inmediatamente
+            };
 
-    } else { 
-        alert("Navegador no compatible."); 
+            // Eventos para el Celular (Tocar la pantalla)
+            btnDictar.addEventListener('touchstart', iniciarGrabacion, {passive: false});
+            btnDictar.addEventListener('touchend', detenerGrabacion);
+            btnDictar.addEventListener('touchcancel', detenerGrabacion);
+
+            // Eventos para el PC (Clic del mouse)
+            btnDictar.addEventListener('mousedown', iniciarGrabacion);
+            btnDictar.addEventListener('mouseup', detenerGrabacion);
+            btnDictar.addEventListener('mouseleave', detenerGrabacion); 
+
+        } else { 
+            btnDictar.onclick = () => alert("Tu navegador actual no soporta el dictado por voz."); 
+        }
     }
-};
+});

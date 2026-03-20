@@ -68,7 +68,7 @@ if (selectInstitucion && selectContacto) {
     // --- ESCUCHADORES PARA BOTONES AJAX (INSTITUCIÓN Y CONTACTO) ---
     
    // Botón Guardar Institución
-    const btnInst = document.getElementById('btnGuardarInst');
+    var btnInst = document.getElementById('btnGuardarInst');
     if (btnInst) {
         btnInst.onclick = function(e) {
             e.preventDefault();
@@ -79,7 +79,7 @@ if (selectInstitucion && selectContacto) {
     }
 
     // Botón Guardar Contacto
-    const btnCont = document.getElementById('btnGuardarCont');
+    var btnCont = document.getElementById('btnGuardarCont');
     if (btnCont) {
         btnCont.onclick = function(e) {
             e.preventDefault();

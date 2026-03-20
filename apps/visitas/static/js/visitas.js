@@ -268,8 +268,9 @@ window.guardarInstitucionRapido = function(url, csrf) {
     .catch(err => console.error("Error en fetch contacto:", err));
 };
   
-// --- Dictado por voz (Estilo WhatsApp: Mantener presionado) ---
+
 // --- Dictado por voz (Estilo WhatsApp: Diseño Mejorado y Mantener presionado) ---
+// --- Dictado por voz (Estilo Interruptor: 1 toque enciende, 1 toque apaga) ---
 document.addEventListener('DOMContentLoaded', function() {
     const btnDictar = document.getElementById('btn_dictar');
     const textarea = document.getElementById('notas_textarea');
@@ -280,18 +281,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const recognition = new SpeechRecognition();
             
             recognition.lang = "es-CL"; 
-            recognition.continuous = true; // Permite pausas mientras mantienes presionado
-            recognition.interimResults = true; // Muestra resultados en vivo
+            recognition.continuous = true; 
+            recognition.interimResults = true; 
             
+            let grabando = false; // <-- Controla si está encendido o apagado
             let textoGuardado = "";
-            let contenidoOriginal = btnDictar.innerHTML; // Guardamos el diseño primary
+            let contenidoOriginal = btnDictar.innerHTML; 
 
             recognition.onstart = function() {
-                // Al presionar: Cambia a ROJO vibrante y dice Grabando
-                btnDictar.innerHTML = '<i class="bi bi-mic-fill me-1 text-white fs-5"></i> <span class="small fw-bold text-white">Grabando...</span>';
-                btnDictar.style.backgroundColor = "#dc3545"; // Color rojo de grabación
+                grabando = true;
+                // Se pone rojo y avisa que puedes tocar para detener
+                btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-1 text-white fs-5"></i> <span class="small fw-bold text-white">Detener</span>';
+                btnDictar.style.backgroundColor = "#dc3545"; 
                 btnDictar.style.color = "white";
-                textoGuardado = textarea.value; // Guardar texto previo
+                textoGuardado = textarea.value; 
             };
 
             recognition.onresult = function(event) { 
@@ -307,32 +310,21 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             recognition.onend = function() {
-                // Al soltar: Vuelve a la normalidad (Fondo oscuro, ícono blanco y Dictar)
+                grabando = false;
+                // Vuelve a la normalidad (Fondo oscuro)
                 btnDictar.innerHTML = contenidoOriginal;
-                btnDictar.style.backgroundColor = ""; // Limpiar el color manual
-                // El CSS base del HTML restaurará el fondo oscuro profesional
+                btnDictar.style.backgroundColor = ""; 
             };
 
-            // --- LÓGICA DE PRESIONAR Y SOLTAR ---
-            const iniciarGrabacion = (e) => {
-                e.preventDefault(); 
-                try { recognition.start(); } catch(err) {}
-            };
-
-            const detenerGrabacion = (e) => {
+            // --- LÓGICA DE 1 TOQUE (Funciona perfecto en PC y Celular) ---
+            btnDictar.onclick = function(e) {
                 e.preventDefault();
-                recognition.stop(); // 🛑 Detiene inmediatamente al soltar el dedo
+                if (grabando) {
+                    recognition.stop(); // Si está rojo, lo apaga
+                } else {
+                    try { recognition.start(); } catch(err) {} // Si está azul, lo enciende
+                }
             };
-
-            // Eventos para el Celular (Tocar la pantalla)
-            btnDictar.addEventListener('touchstart', iniciarGrabacion, {passive: false});
-            btnDictar.addEventListener('touchend', detenerGrabacion);
-            btnDictar.addEventListener('touchcancel', detenerGrabacion);
-
-            // Eventos para el PC (Clic del mouse)
-            btnDictar.addEventListener('mousedown', iniciarGrabacion);
-            btnDictar.addEventListener('mouseup', detenerGrabacion);
-            btnDictar.addEventListener('mouseleave', detenerGrabacion); 
 
         } else { 
             btnDictar.onclick = () => alert("Tu navegador actual no soporta el dictado por voz."); 

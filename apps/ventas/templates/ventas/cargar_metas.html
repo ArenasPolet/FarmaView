@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "Cargar Metas Mensuales" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-4">
+    <div>
+        <div class="d-flex align-items-center gap-3 mb-4 pt-2">
+            <a href="{% url 'visitas:dashboard' %}" class="btn bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0" style="width: 42px; height: 42px;">
+                <i class="bi bi-arrow-left fs-5 text-dark"></i>
+            </a>
+            
+            <div>
+                <nav style="font-size: 1rem; font-weight: 400;">
+                    <a href="{% url 'visitas:dashboard' %}" class="text-decoration-none" style="color: #64748b;">
+                        {% translate "Dashboard" %}
+                    </a> 
+                    <span style="color: #8e99bc;">
+                        &nbsp;>&nbsp; {% translate "Cargar Metas" %}
+                    </span>
+                </nav>
+            </div>
+        </div>
+    
+        <div class="row justify-content-center m-0">
+            <div class="col-12 col-md-8 col-lg-6 px-0">
+                
+                <div class="mb-4">
+                    <h3 class="fw-bolder text-dark mb-1">{% translate "Carga Masiva FarmaView" %}</h3>
+                    <p class="text-muted small">{% translate "Sube el archivo demo.xlsx para actualizar asignaciones de clientes y metas mensuales." %}</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card border-0 shadow-sm rounded-4 bg-white">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'ventas:cargar_metas' %}">
+                            {% csrf_token %}
+                            
+                            <div class="border-2 border-dashed rounded-4 p-5 text-center mb-4 transition-hover" style="border-color: #cbd5e1; background-color: #f8fafc; border-style: dashed; border-width: 2px;">
+                                <i class="bi bi-file-earmark-excel text-success mb-3 d-block" style="font-size: 3rem;"></i>
+                                <h6 class="fw-bold text-dark">{% translate "Sube tu archivo demo.xlsx" %}</h6>
+                                <p class="text-muted small mb-3">
+                                    {% translate "El sistema procesará las hojas:" %}<br>
+                                    <span class="badge bg-light text-dark border mt-1">asignacion</span> 
+                                    <span class="badge bg-light text-dark border mt-1">MEta cliente</span>
+                                </p>
+                                
+                                <input class="form-control form-control-sm mx-auto" type="file" name="archivo_excel" accept=".xlsx, .xls" required style="max-width: 300px;">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
+                                    <i class="bi bi-cloud-arrow-up me-2"></i> {% translate "Procesar y Actualizar Sistema" %}
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-info-circle me-1"></i> {% translate "Instrucciones de Carga" %}</h6>
+                    <ul class="text-muted small mb-0 ps-3">
+                        <li>{% translate "La hoja 'asignacion' vincula RUTs de clientes con Representantes." %}</li>
+                        <li>{% translate "La hoja 'MEta cliente' suma todas las metas individuales por vendedor." %}</li>
+                        <li>{% translate "Los nombres de representantes deben coincidir con los de la base de datos (Ej: DEMO1)." %}</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

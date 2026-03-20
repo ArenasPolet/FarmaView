@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Gestión de Equipo" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-xl-5 py-4" style="background-color: #f1f5f9; min-height: 100vh;">
+    
+    <div class="mb-5 pb-2">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <span class="badge rounded-pill px-3 py-2 fw-bold shadow-sm" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd; border: 1px solid rgba(13, 110, 253, 0.2);">
+                <i class="bi bi-people-fill me-2"></i>{% translate "RECURSOS HUMANOS" %}
+            </span>
+        </nav>
+        <h1 class="fw-bolder text-dark mb-0 display-5" style="letter-spacing: -2px;">{% translate "Gestión de Equipo" %}</h1>
+        <p class="text-muted fw-medium">{% translate "Administra los accesos y el talento humano de tu organización." %}</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-7 col-xxl-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">{% translate "Nómina de Usuarios" %}</h5>
+                    <div class="badge bg-light text-muted border rounded-pill px-3 py-2 fw-semibold">
+                        {{ usuarios.paginator.count }} {% translate "Integrantes" %}
+                    </div>
+                </div>
+                <div class="table-responsive" style="overflow: visible;"> <table class="table table-hover align-middle mb-0">
+                        <thead style="background-color: #f8fafc;">
+                            <tr>
+                                <th class="px-4 py-3 border-0 text-muted small text-uppercase fw-bold">{% translate "Usuario" %}</th>
+                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">{% translate "Rol" %}</th>
+                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">{% translate "Jefe Directo" %}</th>
+                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">{% translate "Estado" %}</th>
+                                <th class="py-3 border-0 text-end px-4 text-muted small text-uppercase fw-bold">{% translate "Acción" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usuarios %}
+                            <tr class="transition-row">
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle shadow-sm me-3 d-flex align-items-center justify-content-center fw-bold text-white" 
+                                             style="width: 42px; height: 42px; background: linear-gradient(135deg, #0d6efd, #0a58ca); border-radius: 12px;">
+                                            {{ u.username|slice:":1"|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ u.username }}</div>
+                                            <div class="text-muted small">{{ u.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {% if u.es_gerente %}
+                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(255, 193, 7, 0.1); color: #856404; border: 1px solid rgba(255, 193, 7, 0.2);">Gerente</span>
+                                    {% else %}
+                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(13, 202, 240, 0.1); color: #087990; border: 1px solid rgba(13, 202, 240, 0.2);">Vendedor</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-dark small fw-bold">{{ u.jefe.get_full_name|default:"---" }}</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if u.is_active %}
+                                        <div class="d-inline-flex align-items-center text-success fw-bold small">
+                                            <span class="pulse-green me-2"></span>{% translate "Activo" %}
+                                        </div>
+                                    {% else %}
+                                        <div class="d-inline-flex align-items-center text-danger fw-bold small">
+                                            <span class="dot-red me-2"></span>{% translate "Inactivo" %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end px-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-icon btn-light rounded-circle shadow-sm" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2" style="z-index: 9999;">
+                                            <li><a class="dropdown-item rounded-3 py-2" href="{% url 'usuarios:editar_usuario' u.id %}"><i class="bi bi-pencil me-2 text-primary"></i>{% translate "Editar Perfil" %}</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST" action="{% url 'usuarios:toggle_estado' u.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item rounded-3 py-2 {% if u.is_active %}text-danger{% else %}text-success{% endif %}">
+                                                        {% if u.is_active %}<i class="bi bi-person-x me-2"></i>{% translate "Desactivar" %}{% else %}<i class="bi bi-person-check me-2"></i>{% translate "Activar" %}{% endif %}
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 py-3 px-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">
+                        {% translate "Mostrando página" %} {{ usuarios.number }} {% translate "de" %} {{ usuarios.paginator.num_pages }}
+                    </span>
+                    <nav aria-label="Navegación de usuarios">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if usuarios.has_previous %}
+                                <li class="page-item"><a class="page-link border-0 rounded-pill shadow-sm me-2 text-primary" href="?page={{ usuarios.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>
+                            {% endif %}
+                            {% if usuarios.has_next %}
+                                <li class="page-item"><a class="page-link border-0 rounded-pill shadow-sm text-primary" href="?page={{ usuarios.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5 col-xxl-4">
+            <div class="card border-0 shadow-lg rounded-4 bg-white sticky-top" style="top: 25px;">
+                <div style="height: 6px; background: linear-gradient(to right, #0d6efd, #6610f2); border-radius: 4px 4px 0 0;"></div>
+                <div class="card-body p-4 p-xl-5">
+                    <div class="text-center mb-5">
+                        <div class="bg-primary bg-opacity-10 text-primary d-inline-flex p-3 rounded-circle mb-3">
+                            <i class="bi bi-person-plus-fill fs-1"></i>
+                        </div>
+                        <h4 class="fw-bolder text-dark mb-1">{% translate "Nuevo Integrante" %}</h4>
+                        <p class="text-muted small">{% translate "Crea una cuenta segura para un nuevo miembro del equipo." %}</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-section-header">{% translate "CREDENCIALES" %}</div>
+                        <div class="mb-3">
+                            <div class="input-group input-group-modern shadow-inner">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                {{ form.username }}
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-4">
+                            <div class="col-6"><div class="input-group input-group-modern shadow-inner"><span class="input-group-text"><i class="bi bi-shield-lock"></i></span>{{ form.password }}</div></div>
+                            <div class="col-6"><div class="input-group input-group-modern shadow-inner">{{ form.confirm_password }}</div></div>
+                        </div>
+
+                        <div class="form-section-header">{% translate "INFORMACIÓN PERSONAL" %}</div>
+                        <div class="row g-2 mb-3"><div class="col-6">{{ form.first_name }}</div><div class="col-6">{{ form.last_name }}</div></div>
+                        <div class="mb-4"><div class="input-group input-group-modern shadow-inner"><span class="input-group-text"><i class="bi bi-envelope-at"></i></span>{{ form.email }}</div></div>
+
+                        <div class="form-section-header">{% translate "ASIGNACIÓN Y ROL" %}</div>
+                        <div class="mb-3">{{ form.rol }}</div>
+                        
+                        <div class="mb-3">
+                            <div class="input-group input-group-modern shadow-inner">
+                                <span class="input-group-text"><i class="bi bi-person-check"></i></span>
+                                {{ form.jefe }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4"><div class="input-group input-group-modern shadow-inner"><span class="input-group-text"><i class="bi bi-building"></i></span>{{ form.empresa }}</div></div>
+                        <div class="mb-5">
+                            <label class="form-label fw-bold text-dark small text-uppercase opacity-75">{% translate "Foto de Perfil" %}</label>
+                            <div class="modern-file-upload shadow-inner p-3 rounded-3 text-center">{{ form.foto_perfil }}</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bolder shadow-lg btn-shine">
+                            <i class="bi bi-plus-circle-fill me-2"></i> {% translate "Registrar Integrante" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Tu CSS original sin cambios */
+    :root { --modern-border: #e2e8f0; --modern-focus: #3b82f6; }
+    .form-section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+    .form-section-header::after { content: ""; height: 1px; flex-grow: 1; background: #e2e8f0; }
+    .input-group-modern { border: 2px solid var(--modern-border); border-radius: 12px; transition: all 0.2s ease; overflow: hidden; }
+    .input-group-modern:focus-within { border-color: var(--modern-focus); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; }
+    .input-group-modern .input-group-text { background: #f8fafc; border: none; color: #64748b; padding-left: 1rem; }
+    .input-group-modern .form-control, .input-group-modern .form-select { border: none !important; box-shadow: none !important; padding: 0.75rem 1rem; font-weight: 500; }
+    .btn-shine { position: relative; overflow: hidden; transition: transform 0.2s ease; }
+    .btn-shine:hover { transform: translateY(-2px); }
+    .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); }
+    .transition-row:hover { background-color: #f8fafc !important; }
+    .pulse-green { width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-ring 2s infinite; }
+    .dot-red { width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; display: inline-block; }
+    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+</style>
+{% endblock %}

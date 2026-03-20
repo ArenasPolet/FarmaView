@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "Agenda Diaria" %}{% endblock %}
+{% block mobile_title %}{% translate "Agenda" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/agenda.css' %}">
+<style>
+    .timeline-container { position: relative; overflow: visible !important; }
+    .time-slot { overflow: visible !important; }
+    .event-card { overflow: visible !important; z-index: 1; }
+    .dropdown-menu { z-index: 9999 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 overflow-hidden">
+    <div class="row justify-content-center m-0">
+        <div class="col-12 col-md-10 col-lg-8 px-0 px-md-2">
+            <div class="d-flex align-items-center gap-3 mb-4 pt-2">
+    <a href="{% url 'visitas:dashboard' %}" class="btn bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0" style="width: 42px; height: 42px;">
+        <i class="bi bi-arrow-left fs-5 text-dark"></i>
+    </a>
+    
+    <div>
+        <nav style="font-size: 1rem; font-weight: 400;">
+            <a href="{% url 'visitas:dashboard' %}" class="text-decoration-none" style="color: #64748b;">
+                {% translate "Dashboard" %}
+            </a> 
+            <span style="color: #8e99bc;">
+                &nbsp;>&nbsp; {% translate "Agenda" %}
+            </span>
+        </nav>
+    </div>
+</div>
+            
+        
+            <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm mb-5 w-100 border" style="max-width: 100vw; overflow: visible;">
+                
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 mb-md-4 gap-3">
+                   
+                    
+                    <div class="d-flex align-items-center gap-2 justify-content-between w-100 w-sm-auto">
+                        <a href="{% url 'visitas:mi_agenda' %}" class="btn btn-sm btn-white fw-bold rounded-pill px-3 py-1 shadow-sm border transition-hover text-primary" style="font-size: 0.85rem;">
+                            {% translate "Hoy" %}
+                        </a>
+                        <a href="{% url 'visitas:agendar_visita' %}" 
+                            class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-3 py-1 shadow-none btn-agendar-custom" 
+                            style="font-size: 0.85rem; border-width: 1px; transition: all 0.3s ease;">
+                                <i class="bi bi-plus-lg me-1"></i>{% translate "Agendar" %}
+                        </a>
+
+                        <form method="GET" action="{% url 'visitas:mi_agenda' %}" id="formCalendario" class="m-0 flex-grow-1 flex-sm-grow-0">
+                            <div class="d-flex align-items-center justify-content-center gap-2 position-relative px-3 py-1 py-md-2 rounded-pill shadow-sm border border-light transition-hover" style="background-color: #F8FAFC; cursor: pointer;">
+                                <span class="fw-bold text-dark text-nowrap" style="font-size: 0.85rem;">{{ fecha_actual|date:"d M, Y" }}</span>
+                                <i class="bi bi-calendar3 text-primary" style="font-size: 0.85rem;"></i>
+                                <input type="date" name="fecha" value="{{ fecha_actual|date:'Y-m-d' }}" 
+                                       class="position-absolute top-0 start-0 w-100 h-100" 
+                                       style="opacity: 0; cursor: pointer;"
+                                       onchange="document.getElementById('formCalendario').submit();">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mb-3 mb-md-4 border-bottom pb-3">
+                    <a href="?fecha={{ semana_anterior|date:'Y-m-d' }}" class="text-decoration-none p-1 p-md-2 nav-arrow transition-hover" style="color: #8e99bc;">
+                        <i class="bi bi-chevron-left fs-5"></i>
+                    </a>
+                    <div class="date-strip d-flex justify-content-around flex-grow-1 mx-1 mx-md-2">
+                        {% for dia in dias_semana %}
+                            <a href="?fecha={{ dia|date:'Y-m-d' }}" class="date-item text-decoration-none {% if dia == fecha_actual %}active shadow-sm{% endif %}">
+                                <span class="date-day text-uppercase fw-bold" style="font-size: 0.7rem;">{{ dia|date:"D"|slice:":1" }}</span>
+                                <span class="date-number fw-bolder">{{ dia|date:"d" }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <a href="?fecha={{ semana_siguiente|date:'Y-m-d' }}" class="text-decoration-none p-1 p-md-2 nav-arrow transition-hover" style="color: #8e99bc;">
+                        <i class="bi bi-chevron-right fs-5"></i>
+                    </a>
+                </div>
+
+                <div class="timeline-container mt-3 ps-1 ps-md-2">
+                    {% for visita in visitas %}
+                    <div class="time-slot position-relative mb-4">
+                        <div class="position-absolute rounded-circle shadow-sm border border-white border-2
+                            {% if visita.estado == 'Realizada' %}bg-success
+                            {% elif visita.estado == 'Cancelada' %}bg-danger
+                            {% else %}bg-warning{% endif %}" 
+                            style="width: 14px; height: 14px; left: -8px; top: 15px; z-index: 2;">
+                        </div>
+                        
+                        <div class="event-card p-3 p-md-4 rounded-4 shadow-sm border-0 border-start border-4 ms-3 ms-md-4 transition-hover bg-white position-relative {% if visita.estado == 'Realizada' %}border-success{% elif visita.estado == 'Cancelada' %}border-danger{% else %}border-warning{% endif %}">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-2">
+                                <div class="w-100">
+                                    <div class="event-title mb-1 fw-bold text-dark fs-6 fs-md-5 text-truncate">{{ visita.institucion.nombre|title }}</div>
+                                    <div class="event-time small text-muted mb-2 fw-medium">
+                                        <i class="bi bi-clock-history"></i> {{ visita.fecha_hora|date:"H:i" }}
+                                    </div>
+                                </div>
+                                
+
+                                <div class="dropdown text-start mt-1 mt-sm-0 w-100 w-sm-auto">
+                                    <button class="btn btn-sm dropdown-toggle rounded-pill fw-bold px-3 py-1 shadow-sm border w-100 w-sm-auto text-start
+                                        {% if visita.estado == 'Realizada' %}bg-success bg-opacity-10 text-success border-success border-opacity-25
+                                        {% elif visita.estado == 'Cancelada' %}bg-danger bg-opacity-10 text-danger border-danger border-opacity-25
+                                        {% else %}bg-warning bg-opacity-10 text-warning-emphasis border-warning border-opacity-25{% endif %}" 
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem;">
+                                        
+                                        {% if visita.estado == 'Realizada' %}<i class="bi bi-check2-circle me-1"></i> {% translate "Realizada" %}
+                                        {% elif visita.estado == 'Cancelada' %}<i class="bi bi-x-circle me-1"></i> {% translate "Cancelada" %}
+                                        {% else %}<i class="bi bi-clock-history me-1"></i> {% translate "Pendiente" %}{% endif %}
+                                    </button>
+                                    
+                                    <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2 mt-1">
+                                        <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">{% translate "Actualizar Estado" %}</h6></li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 small fw-medium text-success py-2 d-flex align-items-center gap-2" href="{% url 'visitas:cambiar_estado' visita.id 'Realizada' %}">
+                                                <i class="bi bi-check-circle-fill"></i> {% translate "Marcar como Realizada" %}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 small fw-medium text-warning-emphasis py-2 d-flex align-items-center gap-2" href="{% url 'visitas:cambiar_estado' visita.id 'Pendiente' %}">
+                                                <i class="bi bi-clock-fill"></i> {% translate "Volver a Pendiente" %}
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider opacity-25"></li>
+                                        <li>
+                                            <a class="dropdown-item rounded-3 small fw-medium text-danger py-2 d-flex align-items-center gap-2" href="{% url 'visitas:cambiar_estado' visita.id 'Cancelada' %}">
+                                                <i class="bi bi-x-circle-fill"></i> {% translate "Cancelar Visita" %}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="event-desc text-secondary d-flex align-items-center flex-wrap gap-2 mt-2" style="font-size: 0.8rem;">
+                                <span class="fw-bold text-dark px-2 py-1 bg-light rounded-2 border">{% translate visita.tipo_gestion|default:"General" %}</span> 
+                                {% if visita.contacto %}
+                                    <span class="opacity-75"><i class="bi bi-person-fill"></i> {{ visita.contacto.nombre|title }}</span>
+                                {% endif %}
+                            </div>
+                            <!--vista gerente-->
+                                {% if request.user.is_superuser or request.user.es_gerente %}
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">
+                                        <i class="bi bi-person-badge text-primary me-1"></i>
+                                        Rep: {{ visita.representante.get_full_name|default:visita.representante.username }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-check text-secondary opacity-25" style="font-size: 4rem;"></i>
+                        <h5 class="text-dark mt-3 fw-bold">{% translate "Sin actividades" %}</h5>
+                        <p class="text-muted small">{% translate "No hay visitas programadas para esta fecha." %}</p>
+                        <a href="{% url 'visitas:agendar_visita' %}" class="btn btn-primary btn-sm rounded-pill px-4 mt-2">
+                            {% translate "Programar Visita" %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

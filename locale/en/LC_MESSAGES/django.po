@@ -1,0 +1,1011 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: FarmaView\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ==========================================================
+# 1. NAVEGACIÓN Y MENÚ LATERAL
+# ==========================================================
+msgid "Menú Principal"
+msgstr "Main Menu"
+
+msgid "Ventas"
+msgstr "Sales"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Agenda Diaria"
+msgstr "Daily Agenda"
+
+msgid "Nueva Visita"
+msgstr "New Visit"
+
+msgid "Historial de Visitas"
+msgstr "Visit History"
+
+msgid "Rendimiento"
+msgstr "Performance"
+
+msgid "Mis Ventas"
+msgstr "My Sales"
+
+msgid "Cobertura Territorial"
+msgstr "Territory Coverage"
+
+msgid "Administración"
+msgstr "Administration"
+
+msgid "Analítica Gerencial"
+msgstr "Management Analytics"
+
+msgid "Cargar Metas"
+msgstr "Upload Targets"
+
+msgid "Actualizar Catálogo"
+msgstr "Update Catalog"
+
+msgid "Gestión de Equipo"
+msgstr "Team Management"
+
+msgid "Cerrar Sesión"
+msgstr "Logout"
+
+# ==========================================================
+# 2. DASHBOARD Y GENERAL
+# ==========================================================
+msgid "Inicio"
+msgstr "Home"
+
+msgid "Hola"
+msgstr "Hello"
+
+msgid "Tu resumen de gestión para hoy."
+msgstr "Your management summary for today."
+
+msgid "Registrar"
+msgstr "Log"
+
+msgid "Visita"
+msgstr "Visit"
+
+msgid "Agendar"
+msgstr "Schedule"
+
+msgid "Historial de"
+msgstr "Visit"
+
+msgid "Visitas"
+msgstr "History"
+
+msgid "Rendimiento Mensual"
+msgstr "Monthly Performance"
+
+msgid "En Curso"
+msgstr "In Progress"
+
+msgid "Ventas totales acumuladas este mes."
+msgstr "Total sales accumulated this month."
+
+msgid "Progreso de Meta"
+msgstr "Goal Progress"
+
+msgid "Proyección Cierre"
+msgstr "Closing Projection"
+
+msgid "Estimado según ritmo actual"
+msgstr "Estimated based on current pace"
+
+msgid "completado"
+msgstr "completed"
+
+msgid "visitas realizadas de"
+msgstr "visits completed out of"
+
+msgid "esperadas"
+msgstr "expected"
+
+msgid "Día Despejado"
+msgstr "Clear Schedule"
+
+msgid "No tienes visitas programadas para hoy."
+msgstr "No visits scheduled for today."
+
+msgid "Agendar Visita"
+msgstr "Schedule a Visit"
+
+msgid "Atención Requerida"
+msgstr "Attention Required"
+
+msgid "Atrasada"
+msgstr "Overdue"
+
+msgid "Resolver"
+msgstr "Resolve"
+
+msgid "Todo al Día"
+msgstr "All Caught Up"
+
+msgid "No hay visitas atrasadas o pendientes importantes."
+msgstr "No overdue visits or major pending tasks."
+
+# ==========================================================
+# 3. PRODUCTOS Y CATÁLOGO
+# ==========================================================
+msgid "Catálogo de Productos"
+msgstr "Product Catalog"
+
+msgid "Catálogo"
+msgstr "Catalog"
+
+msgid "Buscar productos..."
+msgstr "Search products..."
+
+msgid "Buscar"
+msgstr "Search"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "Stock Alto"
+msgstr "In Stock"
+
+msgid "Últimos"
+msgstr "Low Stock"
+
+msgid "Agotado"
+msgstr "Out of Stock"
+
+msgid "Compartir"
+msgstr "Share"
+
+msgid "Ficha"
+msgstr "Details"
+
+msgid "No se encontraron productos"
+msgstr "No products found"
+
+msgid "Intenta buscar con otras palabras o limpia los filtros."
+msgstr "Try searching with other keywords or clear the filters."
+
+msgid "Ver todo el catálogo"
+msgstr "View full catalog"
+
+msgid "SKU"
+msgstr "SKU"
+
+msgid "Nombre"
+msgstr "Name"
+
+msgid "Precio"
+msgstr "Price"
+
+msgid "Stock"
+msgstr "Stock"
+
+msgid "Categoria"
+msgstr "Category"
+
+# ==========================================================
+# 4. GENERAR ORDEN B2B (NUEVA ORDEN)
+# ==========================================================
+msgid "Generar Orden"
+msgstr "Generate Order"
+
+msgid "Nueva Orden"
+msgstr "New Order"
+
+msgid "Datos del Cliente"
+msgstr "Client Details"
+
+msgid "Institución / Farmacia"
+msgstr "Institution / Pharmacy"
+
+msgid "Institución / Farmacia *"
+msgstr "Institution / Pharmacy *"
+
+msgid "Seleccione un cliente..."
+msgstr "Select a client..."
+
+msgid "Buscar cliente..."
+msgstr "Search client..."
+
+msgid "Contacto (Quien solicita)"
+msgstr "Contact (Requester)"
+
+msgid "Primero seleccione una institución..."
+msgstr "First, select an institution..."
+
+msgid "Esperando institución..."
+msgstr "Waiting for institution..."
+
+msgid "Notas u Observaciones"
+msgstr "Notes or Observations"
+
+msgid "Condiciones de despacho, convenios, etc..."
+msgstr "Shipping conditions, agreements, etc..."
+
+msgid "Agregar Productos"
+msgstr "Add Products"
+
+msgid "Buscar producto por nombre o SKU..."
+msgstr "Search product by name or SKU..."
+
+msgid "Cantidad (Cajas)"
+msgstr "Quantity (Boxes)"
+
+msgid "Añadir"
+msgstr "Add"
+
+msgid "Resumen de la Orden"
+msgstr "Order Summary"
+
+msgid "Producto"
+msgstr "Product"
+
+msgid "Cant."
+msgstr "Qty."
+
+msgid "Subtotal"
+msgstr "Subtotal"
+
+msgid "Quitar"
+msgstr "Remove"
+
+msgid "El carrito está vacío"
+msgstr "The cart is empty"
+
+msgid "Agrega productos desde el panel izquierdo"
+msgstr "Add products from the left panel"
+
+msgid "Total Neto Estimado"
+msgstr "Estimated Net Total"
+
+msgid "Confirmar y Generar Orden"
+msgstr "Confirm and Generate Order"
+
+# ==========================================================
+# 5. IMPORTADOR MASIVO (CSV)
+# ==========================================================
+msgid "IMPORTADOR MASIVO"
+msgstr "BULK IMPORTER"
+
+msgid "Actualizar Catálogo y Stock"
+msgstr "Update Catalog and Stock"
+
+msgid "Instrucciones de Formato"
+msgstr "Format Instructions"
+
+msgid "Sube un archivo de Excel guardado como CSV (Valores separados por comas). El sistema buscará el SKU; si existe actualizará el precio y el stock, de lo contrario creará un producto nuevo."
+msgstr "Upload an Excel file saved as CSV. The system will search for the SKU; if it exists, it will update the price and stock, otherwise it will create a new product."
+
+msgid "Las columnas deben llamarse exactamente así:"
+msgstr "Columns must be named exactly like this:"
+
+msgid "Haz clic para seleccionar tu archivo CSV"
+msgstr "Click to select your CSV file"
+
+msgid "Tamaño máximo recomendado: 5MB"
+msgstr "Recommended maximum size: 5MB"
+
+msgid "Procesar Catálogo"
+msgstr "Process Catalog"
+
+# ==========================================================
+# 6. GESTIÓN DE EQUIPO (RRHH)
+# ==========================================================
+msgid "RECURSOS HUMANOS"
+msgstr "HUMAN RESOURCES"
+
+msgid "Nombre Completo"
+msgstr "Full Name"
+
+msgid "Rol"
+msgstr "Role"
+
+msgid "Estado"
+msgstr "Status"
+
+msgid "Acción"
+msgstr "Action"
+
+msgid "Registrar Nuevo Integrante"
+msgstr "Register New Member"
+
+msgid "Crear Usuario"
+msgstr "Create User"
+
+msgid "Usuario"
+msgstr "Username"
+
+# ==========================================================
+# 7. ANALÍTICA GERENCIAL
+# ==========================================================
+msgid "ACCESO GERENCIAL"
+msgstr "MANAGEMENT ACCESS"
+
+msgid "Analítica de Ventas"
+msgstr "Sales Analytics"
+
+msgid "Año"
+msgstr "Year"
+
+msgid "Filtrar por año"
+msgstr "Filter by year"
+
+msgid "Ingresos Totales"
+msgstr "Total Revenue"
+
+msgid "Total Ingresos"
+msgstr "Total Revenue"
+
+msgid "Promedio Mensual"
+msgstr "Monthly Average"
+
+msgid "Órdenes Generadas"
+msgstr "Orders Generated"
+
+msgid "pedidos"
+msgstr "orders"
+
+msgid "Evolución de Ingresos Mensuales"
+msgstr "Monthly Revenue Evolution"
+
+msgid "Evolución Mensual de Ventas"
+msgstr "Monthly Sales Evolution"
+
+msgid "Top 5 Instituciones"
+msgstr "Top 5 Institutions"
+
+msgid "Ventas por Institución"
+msgstr "Sales by Institution"
+
+msgid "Rendimiento por Representante Comercial"
+msgstr "Performance by Sales Representative"
+
+msgid "Ventas por Representante"
+msgstr "Sales by Representative"
+
+msgid "Cumplimiento de Metas"
+msgstr "Target Achievement"
+
+msgid "Datos actualizados en tiempo real"
+msgstr "Data updated in real time"
+
+msgid "Resumen de Ventas Anual"
+msgstr "Annual Sales Summary"
+
+# ==========================================================
+# 8. RENDIMIENTO Y VISITAS (CAMPO)
+# ==========================================================
+msgid "Metas"
+msgstr "Targets"
+
+msgid "Rendimiento Comercial"
+msgstr "Commercial Performance"
+
+msgid "Periodo de evaluación actual"
+msgstr "Current evaluation period"
+
+msgid "Registrar Nueva Venta"
+msgstr "Log New Sale"
+
+msgid "Ventas del Mes"
+msgstr "Monthly Sales"
+
+msgid "de la meta de"
+msgstr "of the target of"
+
+msgid "Alcanzado"
+msgstr "Reached"
+
+msgid "Faltan"
+msgstr "Missing"
+
+msgid "para el bono"
+msgstr "for the bonus"
+
+msgid "Quedan"
+msgstr "Remaining"
+
+msgid "días"
+msgstr "days"
+
+msgid "Ritmo Requerido"
+msgstr "Required Pace"
+
+msgid "día"
+msgstr "day"
+
+msgid "Para lograr la meta a fin de mes."
+msgstr "To achieve the goal by month-end."
+
+msgid "Proyección de Bono"
+msgstr "Bonus Projection"
+
+msgid "¡Bono Asegurado al 100%!"
+msgstr "Bonus Guaranteed at 100%!"
+
+msgid "Asegurado al"
+msgstr "Guaranteed at"
+
+msgid "Rendimiento de"
+msgstr "Performance for"
+
+msgid "Territorio asignado"
+msgstr "Assigned territory"
+
+msgid "Registrar Visita"
+msgstr "Log Visit"
+
+msgid "Cubierto"
+msgstr "Covered"
+
+msgid "Progreso Mensual"
+msgstr "Monthly Progress"
+
+msgid "Has cubierto el"
+msgstr "You have covered"
+
+msgid "de tu territorio este mes."
+msgstr "of your territory this month."
+
+msgid "Meta Total"
+msgstr "Total Target"
+
+msgid "Sitios Visitados"
+msgstr "Visited Sites"
+
+msgid "cuentas pendientes"
+msgstr "accounts remaining"
+
+msgid "Sitios en tu territorio que faltan por visitar."
+msgstr "Sites in your territory pending a visit."
+
+msgid "Detalle del Territorio"
+msgstr "Territory Breakdown"
+
+msgid "Nombre Institución"
+msgstr "Institution Name"
+
+msgid "Tipo"
+msgstr "Type"
+
+msgid "Estado Mes Actual"
+msgstr "Current Month Status"
+
+msgid "Visitado"
+msgstr "Visited"
+
+msgid "Completado"
+msgstr "Completed"
+
+msgid "No hay cuentas registradas en tu territorio."
+msgstr "No accounts registered in your territory."
+
+msgid "Centro Médico"
+msgstr "Medical Center"
+
+# ==========================================================
+# 9. AGENDA Y FORMULARIOS
+# ==========================================================
+msgid "Hoy"
+msgstr "Today"
+
+msgid "Agenda"
+msgstr "Diary"
+
+msgid "Realizada"
+msgstr "Completed"
+
+msgid "Cancelada"
+msgstr "Canceled"
+
+msgid "Pendiente"
+msgstr "Pending"
+
+msgid "Actualizar Estado"
+msgstr "Update Status"
+
+msgid "Marcar como Realizada"
+msgstr "Mark as Completed"
+
+msgid "Volver a Pendiente"
+msgstr "Revert to Pending"
+
+msgid "Cancelar Visita"
+msgstr "Cancel Visit"
+
+msgid "Sin actividades"
+msgstr "Clear Schedule"
+
+msgid "No hay visitas programadas para esta fecha."
+msgstr "No visits scheduled for this date."
+
+msgid "Programar Visita"
+msgstr "Schedule a Visit"
+
+msgid "Historial"
+msgstr "History"
+
+msgid "Buscar institución, contacto o gestión..."
+msgstr "Search institution, contact or management..."
+
+msgid "Total"
+msgstr "Total"
+
+msgid "registros"
+msgstr "records"
+
+msgid "Fecha y Hora"
+msgstr "Date and Time"
+
+msgid "Institución"
+msgstr "Institution"
+
+msgid "Contacto"
+msgstr "Contact"
+
+msgid "Tipo de Gestión"
+msgstr "Management Type"
+
+msgid "No especificado"
+msgstr "Not specified"
+
+msgid "No se encontraron resultados"
+msgstr "No results found"
+
+msgid "Intenta buscar con otros términos o limpia el filtro."
+msgstr "Try searching with other terms or clear the filter."
+
+msgid "Anterior"
+msgstr "Previous"
+
+msgid "Siguiente"
+msgstr "Next"
+
+# ==========================================================
+# 10. NUEVA VISITA (DETALLE)
+# ==========================================================
+msgid "Seleccione Institución..."
+msgstr "Select Institution..."
+
+msgid "Añadir Nueva Institución"
+msgstr "Add New Institution"
+
+msgid "Nombre (Ej. Hospital Central)"
+msgstr "Name (e.g., Central Hospital)"
+
+msgid "RUT (Ej. 76.423.281-K)"
+msgstr "ID (e.g., 76.423.281-K)"
+
+msgid "Dirección Completa"
+msgstr "Full Address"
+
+msgid "Comuna"
+msgstr "District"
+
+msgid "Hospital"
+msgstr "Hospital"
+
+msgid "Clínica"
+msgstr "Clinic"
+
+msgid "Farmacia"
+msgstr "Pharmacy"
+
+msgid "Guardar e Instalar"
+msgstr "Save and Setup"
+
+msgid "Fecha y Hora Realizada"
+msgstr "Date and Time Performed"
+
+msgid "¿Con quién realizó la gestión?"
+msgstr "Who did you meet with?"
+
+msgid "Añadir Nuevo Contacto"
+msgstr "Add New Contact"
+
+msgid "Nombre completo"
+msgstr "Full name"
+
+msgid "Médico"
+msgstr "Doctor"
+
+msgid "Administrativo"
+msgstr "Administrative"
+
+msgid "Enfermería"
+msgstr "Nursing"
+
+msgid "Especialidad"
+msgstr "Specialty"
+
+msgid "Teléfono"
+msgstr "Phone"
+
+msgid "Productos"
+msgstr "Products"
+
+msgid "Seleccionar Productos"
+msgstr "Select Products"
+
+msgid "Toca para modificar"
+msgstr "Tap to modify"
+
+msgid "Presentación"
+msgstr "Presentation"
+
+msgid "Seguimiento"
+msgstr "Follow-up"
+
+msgid "Entrega"
+msgstr "Delivery"
+
+msgid "Capacitación"
+msgstr "Training"
+
+msgid "Cobranza"
+msgstr "Collection"
+
+msgid "Reclamo"
+msgstr "Complaint"
+
+msgid "Otro"
+msgstr "Other"
+
+msgid "Observaciones"
+msgstr "Notes"
+
+msgid "Escriba detalles sobre la visita..."
+msgstr "Write details about the visit..."
+
+msgid "DICTAR NOTA"
+msgstr "DICTATE NOTE"
+
+msgid "FINALIZAR Y GUARDAR GESTIÓN"
+msgstr "FINISH AND SAVE VISIT"
+
+msgid "Buscar producto..."
+msgstr "Search product..."
+
+msgid "Toca para seleccionar"
+msgstr "Tap to select"
+
+msgid "Confirmar Selección"
+msgstr "Confirm Selection"
+
+msgid "Definir Gestión Personalizada"
+msgstr "Define Custom Management"
+
+msgid "Ej: Cotización"
+msgstr "e.g., Quotation"
+
+msgid "Elegir Icono"
+msgstr "Choose Icon"
+
+msgid "Aplicar"
+msgstr "Apply"
+
+msgid "Excelencia Comercial"
+msgstr "Commercial Excellence"
+
+msgid "Cobertura"
+msgstr "coverage"
+
+msgid "Cotización"
+msgstr "Quote"
+
+# ==========================================================
+# 11. COMPROBANTES Y LOGIN
+# ==========================================================
+msgid "Comprobante de Orden"
+msgstr "Order Receipt"
+
+msgid "Avisar por WhatsApp"
+msgstr "Notify via WhatsApp"
+
+msgid "Descargar PDF"
+msgstr "Download PDF"
+
+msgid "ORDEN DE TRANSFERENCIA"
+msgstr "TRANSFER ORDER"
+
+msgid "Emitido a:"
+msgstr "Issued to:"
+
+msgid "Contacto:"
+msgstr "Contact:"
+
+msgid "RUT/ID:"
+msgstr "Tax ID:"
+
+msgid "Detalles:"
+msgstr "Details:"
+
+msgid "Fecha:"
+msgstr "Date:"
+
+msgid "Representante:"
+msgstr "Representative:"
+
+msgid "Precio Unit."
+msgstr "Unit Price"
+
+msgid "Notas / Observaciones:"
+msgstr "Notes / Observations:"
+
+msgid "IVA (19%):"
+msgstr "VAT (19%):"
+
+msgid "TOTAL:"
+msgstr "TOTAL:"
+
+msgid "Documento generado por FarmaView App."
+msgstr "Document generated by FarmaView App."
+
+msgid "Iniciar Sesión"
+msgstr "Login"
+
+msgid "Bienvenido"
+msgstr "Welcome"
+
+msgid "Ingresa a tu cuenta de FarmaView para continuar"
+msgstr "Sign in to your FarmaView account to continue"
+
+msgid "Usuario / RUT"
+msgstr "Username / ID"
+
+msgid "Ingresa tu usuario"
+msgstr "Enter your username"
+
+msgid "Contraseña"
+msgstr "Password"
+
+msgid "¿Olvidaste tu contraseña?"
+msgstr "Forgot your password?"
+
+msgid "Contactar Soporte"
+msgstr "Contact Support"
+
+# ==========================================================
+# 12. MISCELÁNEOS
+# ==========================================================
+msgid "Seleccionar Archivo"
+msgstr "Select File"
+
+msgid "Ningún archivo selecionado"
+msgstr "No file selected"
+
+msgid "Monto Neeto"
+msgstr "Net amount"
+
+msgid "Detalle de Órdenes del Mes"
+msgstr "Monthly Order Details"
+
+# ==========================================================
+# 13. CARGAR METAS (EXCEL)
+# ==========================================================
+msgid "Cargar Metas Mensuales"
+msgstr "Upload Monthly Targets"
+
+msgid "Carga Masiva de Metas"
+msgstr "Bulk Target Upload"
+
+msgid "Sube un archivo Excel (.xlsx) para actualizar las metas de tu equipo."
+msgstr "Upload an Excel file (.xlsx) to update your team's targets."
+
+msgid "Selecciona tu archivo Excel"
+msgstr "Select your Excel file"
+
+msgid "Las columnas deben ser:"
+msgstr "Columns must be:"
+
+msgid "Procesar Metas"
+msgstr "Process Targets"
+
+msgid "Formato del Excel"
+msgstr "Excel Format"
+
+msgid "Asegúrate de que la primera fila contenga los títulos de las columnas. El sistema buscará al representante por su correo electrónico. Si la meta ya existe para ese mes y año, se actualizará con el nuevo monto."
+msgstr "Ensure the first row contains column headers. The system will search for representatives by email. If a target already exists for that month and year, it will be updated with the new amount."
+
+msgid "Paracetamol 500mg"
+msgstr "Paracetamol 500mg"
+
+msgid "Ibuprofeno 400mg"
+msgstr "Ibuprofen 400mg"
+
+msgid "Analgésicos"
+msgstr "Analgesics"
+
+# =============================================================================
+# GESTIÓN DE EQUIPO
+# =============================================================================
+
+msgid "Administra los accesos y el talento humano de tu organización."
+msgstr "Manage the access and human talent of your organization."
+
+msgid "Nómina de Usuarios"
+msgstr "User Roster"
+
+msgid "Integrantes"
+msgstr "Members"
+
+msgid "Activo"
+msgstr "Active"
+
+msgid "Inactivo"
+msgstr "Inactive"
+
+msgid "Editar Perfil"
+msgstr "Edit Profile"
+
+msgid "Desactivar"
+msgstr "Deactivate"
+
+msgid "Activar"
+msgstr "Activate"
+
+# --- Paginación ---
+
+msgid "Mostrando página"
+msgstr "Showing page"
+
+msgid "de"
+msgstr "of"
+
+# --- Formulario de Alta ---
+
+msgid "Nuevo Integrante"
+msgstr "New Member"
+
+msgid "Crea una cuenta segura para un nuevo miembro del equipo."
+msgstr "Create a secure account for a new team member."
+
+msgid "CREDENCIALES"
+msgstr "CREDENTIALS"
+
+msgid "INFORMACIÓN PERSONAL"
+msgstr "PERSONAL INFORMATION"
+
+msgid "ASIGNACIÓN Y ROL"
+msgstr "ASSIGNMENT AND ROLE"
+
+msgid "Foto de Perfil"
+msgstr "Profile Picture"
+
+msgid "Registrar Integrante"
+msgstr "Register Member"
+
+
+# =============================================================================
+# EDITAR USUARIO
+# =============================================================================
+
+msgid "Editar Usuario"
+msgstr "Edit User"
+
+msgid "EDICIÓN"
+msgstr "EDITING"
+
+msgid "Editar a"
+msgstr "Edit"
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Guardar Cambios"
+msgstr "Save Changes"
+
+# ==========================================================
+# COMPLEMENTOS ANALÍTICA (TÍTULOS DE GRÁFICOS)
+# ==========================================================
+
+msgid "Evolución de Ingresos"
+msgstr "Revenue Evolution"
+
+msgid "Volumen de Pedidos"
+msgstr "Order Volume"
+
+msgid "Rendimiento por Representante"
+msgstr "Performance by Representative"
+
+msgid "Top 5 Productos Más Vendidos"
+msgstr "Top 5 Best Selling Products"
+
+# ==========================================================
+# SUBTÍTULOS Y DETALLES ANALÍTICA
+# ==========================================================
+
+msgid "Dinero facturado mes a mes en"
+msgstr "Money invoiced month by month in"
+
+msgid "Cantidad de órdenes cerradas en"
+msgstr "Number of closed orders in"
+
+msgid "(Mensual)"
+msgstr "(Monthly)"
+
+
+msgid "Mayores compradores en"
+msgstr "Top buyers in"
+
+msgid "Total facturado por vendedor en"
+msgstr "Total invoiced per salesperson in"
+
+msgid "Comparativa de ingresos totales por año"
+msgstr "Total revenue comparison by year"
+
+msgid "Unidades vendidas durante el año"
+msgstr "Units sold during the year"
+
+msgid "Crecimiento Histórico"
+msgstr "Historical Growth"
+
+msgid "(Todos los años)"
+msgstr "(All years)"
+
+msgid "(Anual)"
+msgstr "(Annual)"
+
+
+# --- Placeholders del Formulario (forms.py) ---
+msgid "Nombre de usuario"
+msgstr "Username"
+
+msgid "correo@ejemplo.com"
+msgstr "email@example.com"
+
+msgid "Nombre de la empresa"
+msgstr "Company name"
+
+msgid "Confirmar Contraseña"
+msgstr "Confirm Password"
+
+msgid "Apellido"
+msgstr "Last Name"
+
+# Carga Masiva FarmaView
+msgid "Carga Masiva FarmaView"
+msgstr "FarmaView Bulk Upload"
+
+# Sube el archivo demo.xlsx para actualizar asignaciones de clientes y metas mensuales.
+msgid "Sube el archivo demo.xlsx para actualizar asignaciones de clientes y metas mensuales."
+msgstr "Upload the demo.xlsx file to update client assignments and monthly goals."
+
+# Sube tu archivo demo.xlsx
+msgid "Sube tu archivo demo.xlsx"
+msgstr "Upload your demo.xlsx file"
+
+# El sistema procesará las hojas:
+msgid "El sistema procesará las hojas:"
+msgstr "The system will process the sheets:"
+
+# asignacion
+msgid "asignacion"
+msgstr "assignment"
+
+# MEta cliente
+msgid "MEta cliente"
+msgstr "client meta"
+
+# Instrucciones de Carga
+msgid "Instrucciones de Carga"
+msgstr "Upload Instructions"
+
+# La hoja 'asignacion' vincula RUTs de clientes con Representantes.
+msgid "La hoja 'asignacion' vincula RUTs de clientes con Representantes."
+msgstr "The 'assignment' sheet links client RUTs with Representatives."
+
+# La hoja 'MEta cliente' suma todas las metas individuales por vendedor.
+msgid "La hoja 'MEta cliente' suma todas las metas individuales por vendedor."
+msgstr "The 'client meta' sheet sums all individual goals per salesperson."
+
+# Los nombres de representantes deben coincidir con los de la base de datos (Ej: DEMO1).
+msgid "Los nombres de representantes deben coincidir con los de la base de datos (Ej: DEMO1)."
+msgstr "Representative names must match those in the database (e.g., DEMO1)."

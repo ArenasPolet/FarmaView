@@ -1,0 +1,37 @@
+/* * Archivo: login.css
+ * Estilos específicos para la pantalla de inicio de sesión
+ */
+
+body {
+    background-color: #F4F7FB; /* Fondo general suave */
+}
+
+/* Ajuste visual para inputs modernos */
+.form-control:focus {
+    border-color: #0047AB; /* Azul FarmaView */
+    box-shadow: 0 0 0 0.25rem rgba(0, 71, 171, 0.15);
+}
+
+.input-group-text { 
+    background-color: #F8FAFC; 
+    border-color: #E5E7EB;
+}
+
+.form-control {
+    border-color: #E5E7EB;
+}
+
+/* Estilo específico para el botón del login */
+.btn-login {
+    background-color: #0047AB;
+    color: white;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background-color: #003580;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 71, 171, 0.2);
+}

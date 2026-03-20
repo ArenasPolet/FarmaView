@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+
+{% block title %}{% translate "Comprobante de Orden" %} #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-4" style="background-color: #f1f5f9; min-height: 100vh;">
+    
+    <div class="row justify-content-center mb-4">
+        <div class="col-12 col-lg-8 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <a href="#" onclick="window.history.back(); return false;" class="btn btn-white shadow-sm fw-bold border-0 rounded-pill px-4 transition-hover">
+                <i class="bi bi-arrow-left"></i> {% translate "Volver" %}
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="https://api.whatsapp.com/send?text=Hola%20{{ pedido.contacto.nombre|urlencode }},%20te%20adjunto%20el%20detalle%20de%20tu%20Orden%20de%20Transferencia%20%23{{ pedido.id }}%20por%20un%20total%20de%20${{ pedido.total_neto|intcomma }}.%20¡Gracias%20por%20preferirnos!" 
+                   target="_blank" 
+                   class="btn shadow-sm fw-bold border-0 rounded-pill px-4 d-flex align-items-center gap-2" 
+                   style="background-color: #25D366; color: white;">
+                    <i class="bi bi-whatsapp fs-5"></i> <span class="d-none d-sm-inline">{% translate "Avisar por WhatsApp" %}</span>
+                </a>
+                
+                <button onclick="generarPDF()" class="btn shadow-sm fw-bold border-0 rounded-pill px-4 d-flex align-items-center gap-2" style="background-color: #ef4444; color: white;">
+                    <i class="bi bi-file-earmark-pdf-fill fs-5"></i> <span class="d-none d-sm-inline">{% translate "Descargar PDF" %}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-lg p-3 p-md-5 bg-white" id="documentoFactura" style="border-radius: 0;">
+                
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start border-bottom pb-4 mb-4 gap-3">
+                    <div>
+                        <img src="{% static 'farmaview.png' %}" alt="Logo" height="50" class="mb-3">
+                        <h4 class="fw-bolder text-dark mb-0">{% translate "ORDEN DE TRANSFERENCIA" %}</h4>
+                        <p class="text-muted small mb-0 fw-medium">{% translate "Documento de respaldo interno" %}</p>
+                    </div>
+                    <div class="text-md-end">
+                        <h2 class="text-secondary mb-0 fw-bold">#{{ pedido.id }}</h2>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 mt-2">
+                            {{ pedido.estado }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row mb-4 mb-md-5">
+                    <div class="col-12 col-md-6 mb-4 mb-md-0">
+                        <h6 class="text-muted fw-bold text-uppercase small mb-2">{% translate "Emitido a:" %}</h6>
+                        <h5 class="fw-bold text-dark mb-1">{{ pedido.institucion.nombre }}</h5>
+                        <p class="mb-0 text-secondary small">{% translate "Contacto:" %} {{ pedido.contacto.nombre|default:"Sin especificar" }}</p>
+                        <p class="mb-0 text-secondary small">{% translate "RUT/ID:" %} {{ pedido.institucion.rut|default:"-" }}</p>
+                    </div>
+                    <div class="col-12 col-md-6 text-md-end">
+                        <h6 class="text-muted fw-bold text-uppercase small mb-2">{% translate "Detalles:" %}</h6>
+                        <p class="mb-0 text-secondary small"><strong>{% translate "Fecha:" %}</strong> {{ pedido.fecha_creacion|date:"d de F, Y" }}</p>
+                        <p class="mb-0 text-secondary small"><strong>{% translate "Representante:" %}</strong> {{ pedido.representante.get_full_name }}</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-4 mb-md-5 border rounded-3 shadow-sm">
+                    <table class="table table-hover table-striped mb-0 align-middle" style="min-width: 500px;">
+                        <thead class="table-light border-bottom">
+                            <tr>
+                                <th class="text-uppercase small text-secondary fw-bolder px-4 py-3">{% translate "Producto" %}</th>
+                                <th class="text-uppercase small text-secondary fw-bolder text-center px-4 py-3" width="15%">{% translate "Cant." %}</th>
+                                <th class="text-uppercase small text-secondary fw-bolder text-end px-4 py-3" width="20%">{% translate "Precio Unit." %}</th>
+                                <th class="text-uppercase small text-secondary fw-bolder text-end px-4 py-3" width="20%">{% translate "Subtotal" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            {% for item in detalles %}
+                            <tr>
+                                <td class="fw-bold text-dark px-4 py-3">{{ item.producto.nombre }}</td>
+                                <td class="text-center px-4 py-3">
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2" style="font-size: 0.85rem;">
+                                        {{ item.cantidad }}
+                                    </span>
+                                </td>
+                                <td class="text-end px-4 py-3 text-secondary fw-medium">${{ item.precio_unitario_historico|intcomma }}</td>
+                                <td class="text-end fw-bolder px-4 py-3" style="color: #0f172a; font-size: 1.05rem;">${{ item.subtotal|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4">
+                    
+                    <div class="col-12 col-md-7 mb-4 mb-md-0 pe-md-5">
+                        {% if pedido.notas_internas %}
+                        <h6 class="text-muted fw-bolder text-uppercase small mb-3" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-chat-left-text me-2"></i>{% translate "Notas / Observaciones" %}
+                        </h6>
+                        <div class="p-4 rounded-4 bg-white shadow-sm border" style="border-left: 4px solid #94a3b8 !important;">
+                            <p class="small text-secondary mb-0 fw-medium" style="line-height: 1.6;">
+                                {{ pedido.notas_internas }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-12 col-md-5">
+                        <div class="p-4 rounded-4 shadow-sm border" style="background-color: #f8fafc;">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-bold small text-uppercase" style="letter-spacing: 0.5px;">{% translate "Subtotal" %}</span>
+                                <span class="fw-bold text-dark fs-6">${{ pedido.total_neto|intcomma }}</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-bold small text-uppercase" style="letter-spacing: 0.5px;">{% translate "IVA (19%)" %}</span>
+                                <span class="fw-bold text-dark fs-6">${{ pedido.total_iva|default:"0"|intcomma }}</span>
+                            </div>
+                            
+                            <hr class="border-secondary opacity-25 my-4">
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bolder text-dark fs-6 text-uppercase" style="letter-spacing: 0.5px;">{% translate "Total Final" %}</span>
+                                <span class="fw-bolder text-break text-end" style="color: #1784C7; font-size: 1.3rem; letter-spacing: -1px;">
+                                    ${{ pedido.total_final|default:pedido.total_neto|intcomma }}
+                                </span>
+                            </div>
+                            
+                            <!--
+                            <div class="text-end mt-2">
+                                <small class="text-muted fw-medium" style="font-size: 0.7rem;">{% translate "* Valores expresados en CLP" %}</small>
+                            </div>-->
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5 pt-4 border-top">
+                    <p class="small text-muted mb-0">{% translate "Documento generado por FarmaView App." %}</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    function generarPDF() {
+        const elemento = document.getElementById('documentoFactura');
+        
+        // Opciones del PDF (A4, alta calidad)
+        const opt = {
+            margin:       0.2, // Margen ligero para asegurar que no se corten los bordes
+            filename:     `Orden_Transferencia_#{{ pedido.id }}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generar y descargar
+        html2pdf().set(opt).from(elemento).save();
+    }
+</script>
+{% endblock %}

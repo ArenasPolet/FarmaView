@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Editar Usuario" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4" style="background-color: #f8fafc; min-height: 100vh;">
+    
+    <div class="d-flex align-items-center mb-4 pb-2 border-bottom border-light gap-3">
+        <a href="{% url 'usuarios:gestion_equipo' %}" class="btn bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0" style="width: 42px; height: 42px;">
+            <i class="bi bi-arrow-left fs-5 text-dark"></i>
+        </a>
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1 mb-2 fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">
+                <i class="bi bi-pencil-square me-1"></i> {% translate "EDICIÓN" %}
+            </span>
+            <h2 class="fw-bolder text-dark mb-0 display-6" style="letter-spacing: -1.5px;">{% translate "Editar a" %} {{ usuario_edit.get_full_name|default:usuario_edit.username }}</h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card card-farma border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-body p-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            {% for field in form %}
+                                <div class="col-12 {% if field.name == 'first_name' or field.name == 'last_name' %}col-md-6{% endif %}">
+                                    <label class="form-label small fw-bold text-muted">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="text-danger small mt-1 fw-medium">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4 text-light">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'usuarios:gestion_equipo' %}" class="btn btn-light rounded-pill px-4 py-2 fw-bold">
+                                {% translate "Cancelar" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-save me-2"></i> {% translate "Guardar Cambios" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

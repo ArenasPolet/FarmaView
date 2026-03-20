@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+
+{% block title %}{% translate "Analítica Gerencial" %}{% endblock %}
+
+{% block content %}
+<style>
+    /* Reglas críticas para la captura de PDF y diseño general */
+    #reporte-analitica {
+        background-color: #f8fafc !important; /* Mismo color del fondo de la página */
+        padding: 20px;
+        border-radius: 15px;
+        /* IMPORTANTE: overflow visible para que el clon del canvas no recorte nada */
+        overflow: visible !important; 
+    }
+
+    /* Asegura que los gráficos se adapten bien en el clon del PDF */
+    #reporte-analitica canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+</style>
+
+<div class="container-fluid px-2 px-md-4 py-3 py-md-4 min-vh-100" style="background-color: #f8fafc;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-light flex-wrap gap-3">
+        <div>
+            <span class="badge bg-dark bg-opacity-10 text-dark border rounded-pill px-3 py-1 mb-2 fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">
+                <i class="bi bi-shield-lock-fill text-warning"></i> {% translate "ACCESO GERENCIAL" %}
+            </span>
+            <h2 class="fw-bolder text-dark mb-0 display-6" style="letter-spacing: -1.5px;">{% translate "Analítica de Ventas" %} {{ anio_actual }}</h2>
+            <p class="text-muted small mb-0 mt-1">{% translate "Resumen de rendimiento y cumplimiento de metas" %}</p>
+        </div>
+        
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select id="selectMes" class="form-select border-0 shadow-sm rounded-pill fw-medium bg-white px-4" style="width: 150px;">
+                <option value="0">{% translate "Todo el año" %}</option>
+                <option value="1" {% if mes_actual == 1 %}selected{% endif %}>Enero</option>
+                <option value="2" {% if mes_actual == 2 %}selected{% endif %}>Febrero</option>
+                <option value="3" {% if mes_actual == 3 %}selected{% endif %}>Marzo</option>
+                </select>
+            <select id="selectAnio" class="form-select border-0 shadow-sm rounded-pill fw-medium bg-white px-4" style="width: 150px; cursor: pointer;">
+                {% for anio in anios_disponibles %}
+                    <option value="{{ anio }}" {% if anio == anio_actual %}selected{% endif %}>
+                        {% translate "Año" %} {{ anio }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <a href="{% url 'ventas:exportar_metas_excel' %}" class="btn btn-white shadow-sm border-0 rounded-3 px-3">
+                <i class="bi bi-file-earmark-excel-fill text-success me-1"></i>
+                <span class="d-none d-sm-inline">{% translate "Metas Excel" %}</span>
+            </a>
+
+            <button onclick="descargarPDFAnalitica(event)" class="btn btn-brand shadow-sm rounded-3 px-3 text-white">
+                <i class="bi bi-file-pdf-fill me-1"></i>
+                <span class="d-none d-sm-inline">{% translate "Descargar PDF" %}</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="reporte-analitica">
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 h-100 bg-white transition-card-hover" style="border-left: 5px solid var(--brand-blue) !important;">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted fw-bold text-uppercase small" style="letter-spacing: 1px;">{% translate "Ingresos Totales" %} ({{ anio_actual }})</span>
+                            <h2 class="fw-bolder text-dark mb-0 mt-1">${{ total_ingresos_anio|intcomma }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 60px; height: 60px;">
+                            <i class="bi bi-cash-stack fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 h-100 bg-white transition-card-hover" style="border-left: 5px solid #10b981 !important;">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted fw-bold text-uppercase small" style="letter-spacing: 1px;">{% translate "Órdenes Generadas" %}</span>
+                            <h2 class="fw-bolder text-dark mb-0 mt-1">{{ total_pedidos_anio }} <span class="fs-6 text-muted fw-medium">{% translate "pedidos" %}</span></h2>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center text-success" style="width: 60px; height: 60px;">
+                            <i class="bi bi-receipt fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--ALERTA VENDEDORES-->
+        {% if vendedores_en_riesgo %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-4 shadow-sm border-0 border-start border-danger border-5 rounded-4 bg-white" style="border-left-width: 5px !important; border-left-color: #dc3545 !important;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-4 me-2"></i>
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Semáforo de Gestión: Alerta de Cumplimiento" %}</h5>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        {% translate "Los siguientes representantes registran un cumplimiento crítico (menor al 40%) superada la mitad del mes actual. Se sugiere revisión comercial." %}
+                    </p>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless align-middle mb-0">
+                            <tbody>
+                                {% for rep in vendedores_en_riesgo %}
+                                <tr class="border-bottom border-light">
+                                    <td class="fw-bold text-dark w-25">
+                                        <i class="bi bi-person-circle text-muted me-2"></i>{{ rep.nombre }}
+                                    </td>
+                                    <td class="w-50">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-3 shadow-sm" style="height: 10px; border-radius: 10px;">
+                                                <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ rep.cumplimiento }}%"></div>
+                                            </div>
+                                            <span class="badge bg-danger rounded-pill px-2 py-1">{{ rep.cumplimiento }}%</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end text-muted small w-25">
+                                        {% translate "Meta" %}: ${{ rep.meta|intcomma }} <br>
+                                        <span class="text-danger fw-bold">{% translate "Actual" %}: ${{ rep.venta|intcomma }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-xl-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Evolución de Ingresos" %} <span class="text-primary">{% translate "(Mensual)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Dinero facturado mes a mes en" %} {{ anio_actual }}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartMeses"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Volumen de Pedidos" %} <span class="text-primary">{% translate "(Mensual)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Cantidad de órdenes cerradas en" %} {{ anio_actual }}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartVentasMensuales"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-xl-4">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Top 5 Instituciones" %} <span class="text-success">{% translate "(Anual)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Mayores compradores en" %} {{ anio_actual }}</p>
+                    </div>
+                    <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                        <div style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
+                            <canvas id="chartInstituciones"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-8">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Rendimiento por Representante" %} <span class="text-success">{% translate "(Anual)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Total facturado por vendedor en" %} {{ anio_actual }}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartReps"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5 pb-5">
+            <div class="col-12 col-xl-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Crecimiento Histórico" %} <span class="text-warning">{% translate "(Todos los años)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Comparativa de ingresos totales por año" %}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartHistoricoAnual"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 transition-card-hover">
+                    <div class="card-header bg-white border-0 p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">{% translate "Top 5 Productos" %} <span class="text-success">{% translate "(Anual)" %}</span></h5>
+                        <p class="text-muted small mb-0">{% translate "Unidades vendidas durante el año" %} {{ anio_actual }}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartProductos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div> 
+    </div>
+
+{{ meses_labels|json_script:"dataMesesLabels" }}
+{{ meses_data|json_script:"dataMesesValues" }}
+{{ meses_pedidos|json_script:"dataMesesPedidos" }}
+{{ inst_labels|json_script:"dataInstLabels" }}
+{{ inst_data|json_script:"dataInstValues" }}
+{{ rep_labels|json_script:"dataRepLabels" }}
+{{ rep_data|json_script:"dataRepValues" }}
+{{ hist_labels|json_script:"dataHistLabels" }}
+{{ hist_data|json_script:"dataHistValues" }}
+{{ prod_labels|json_script:"dataProdLabels" }}
+{{ prod_data|json_script:"dataProdValues" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'js/analitica.js' %}"></script>
+{% endblock %}

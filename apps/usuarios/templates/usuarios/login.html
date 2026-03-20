@@ -1,0 +1,111 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmaView - {% translate "Iniciar Sesión" %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"> 
+</head>
+
+<body class="d-flex align-items-center justify-content-center min-vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 px-4">
+                
+                <div class="card card-farma p-4 p-md-5 border-0 shadow-lg" style="border-radius: 20px;">
+                    
+                    <div class="text-center mb-5">
+                        <img src="{% static 'farmaview.png' %}" alt="Logo FarmaView" height="60" class="mb-3 object-fit-contain">
+                        <h3 class="fw-bold mb-1" style="color: #1a1e34;"> {% translate "Excelencia Comercial" %}</h3>
+                        <p class="text-muted small">{% translate "Ingresa a tu cuenta para continuar" %}</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger py-2 text-center fw-bold fs-6 mb-4 rounded-3 border-0" style="background-color: #FEE2E2; color: #991B1B;" role="alert">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="username" class="form-label text-muted fw-bold text-uppercase mb-2" style="font-size: 11px; letter-spacing: 1px;">{% translate "Usuario" %}</label>
+                            <div class="input-group rounded-3">
+                                <span class="input-group-text border-end-0 text-muted px-3 rounded-start-3">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" id="username" name="username" class="form-control border-start-0 py-3 bg-light rounded-end-3" placeholder="{% translate 'Ingresa tu usuario' %}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label text-muted fw-bold text-uppercase mb-2" style="font-size: 11px; letter-spacing: 1px;">{% translate "Contraseña" %}</label>
+                            <div class="input-group rounded-3">
+                                <span class="input-group-text border-end-0 text-muted px-3 rounded-start-3">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" id="password" name="password" class="form-control border-start-0 border-end-0 py-3 bg-light" placeholder="••••••••" required>
+                                
+                                <span class="input-group-text border-start-0 text-muted px-3 rounded-end-3 bg-light" style="cursor: pointer;" id="togglePassword">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mb-4">
+                            <a href="#" class="fw-bold text-decoration-none" style="font-size: 13px; color: #0047AB;">{% translate "¿Olvidaste tu contraseña?" %}</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-login w-100 py-3 d-flex justify-content-center align-items-center gap-2 fw-bold shadow-sm" style="font-size: 1.1rem; border-radius: 12px;">
+                            {% translate "Iniciar Sesión" %}
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <div class="mt-5 pt-3 border-top border-light text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-3" style="font-size: 10px; letter-spacing: 1px;">
+                            {% translate "Seleccionar Idioma" %}
+                        </p>
+                        <form action="{% url 'set_language' %}" method="post" class="d-flex justify-content-center gap-2">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                            
+                            <button type="submit" name="language" value="es" 
+                                    class="btn btn-sm rounded-pill px-3 shadow-sm border {% if LANGUAGE_CODE == 'es' %}btn-dark fw-bold{% else %}btn-white text-muted{% endif %}" 
+                                    style="font-size: 11px;">
+                                ESPAÑOL
+                            </button>
+                            
+                            <button type="submit" name="language" value="en" 
+                                    class="btn btn-sm rounded-pill px-3 shadow-sm border {% if LANGUAGE_CODE == 'en' %}btn-dark fw-bold{% else %}btn-white text-muted{% endif %}" 
+                                    style="font-size: 11px;">
+                                ENGLISH
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small fw-medium">{% translate "¿Necesitas ayuda?" %} <a href="#" class="text-decoration-none fw-bold" style="color: #0047AB;">{% translate "Contactar Soporte" %}</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

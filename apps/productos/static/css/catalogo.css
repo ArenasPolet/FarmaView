@@ -1,0 +1,58 @@
+/* static/css/catalogo.css */
+
+/* Contenedor principal y fondo */
+.catalogo-container {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Estilo de la Tarjeta (Card) */
+.card-producto {
+    border: none !important;
+    border-radius: 20px !important;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.10);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: visible !important;
+}
+
+/* Efecto Hover: Elevación y Sombra de Marca */
+.card-producto:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 35px rgba(23, 132, 199, 0.15) !important;
+}
+
+/* Contenedor de Imagen */
+.img-container {
+    background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%) !important;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 1px solid #f1f5f9;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.img-container img {
+    transition: transform 0.5s ease;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.08));
+}
+
+.card-producto:hover .img-container img {
+    transform: scale(1.08);
+}
+
+/* Botones de acción */
+.btn-action {
+    border-radius: 10px !important;
+    transition: all 0.2s ease;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.btn-action:hover {
+    transform: scale(1.03);
+    filter: brightness(0.95);
+}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Actualizar Catálogo" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-4" style="background-color: #f8fafc; min-height: 100vh;">
+    
+    <div class="mb-4 pb-2 border-bottom border-light">
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1 mb-2 fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">
+            <i class="bi bi-database-fill-up text-primary me-1"></i> {% translate "IMPORTADOR MASIVO" %}
+        </span>
+        <h2 class="fw-bolder text-dark mb-0 display-6" style="letter-spacing: -1.5px;">{% translate "Actualizar Catálogo y Stock" %}</h2>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-4 shadow-sm border-0" role="alert">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-triangle-fill text-danger{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-5">
+            <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100">
+                <div class="card-body p-4 p-md-5">
+                    <h5 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-info-circle text-primary me-2"></i> {% translate "Instrucciones de Formato" %}
+                    </h5>
+                    
+                    <p class="text-secondary mb-4">
+                        {% translate "Sube un archivo de Excel guardado como CSV (Valores separados por comas). El sistema buscará el SKU; si existe actualizará el precio y el stock, de lo contrario creará un producto nuevo." %}
+                    </p>
+
+                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">{% translate "Las columnas deben llamarse exactamente así:" %}</h6>
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-sm table-bordered mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold text-dark">{% translate "SKU" %}</th>
+                                    <th class="fw-bold text-dark">{% translate "Nombre" %}</th>
+                                    <th class="fw-bold text-dark">{% translate "Precio" %}</th>
+                                    <th class="fw-bold text-dark">{% translate "Stock" %}</th>
+                                    <th class="fw-bold text-dark">{% translate "Categoria" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                    <td class="text-secondary font-monospace">1005A</td>
+                                    <td class="text-secondary">{% translate "Paracetamol 500mg" %}</td>
+                                    <td class="text-secondary font-monospace">1500</td>
+                                    <td class="text-secondary font-monospace">250</td>
+                                    <td class="text-secondary">{% translate "Analgésicos" %}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-secondary font-monospace">1005B</td>
+                                    <td class="text-secondary">{% translate "Ibuprofeno 400mg" %}</td>
+                                    <td class="text-secondary font-monospace">2200</td>
+                                    <td class="text-secondary font-monospace">50</td>
+                                    <td class="text-secondary">{% translate "Analgésicos" %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-7">
+            <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100">
+                <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
+                    
+                    <form method="POST" enctype="multipart/form-data" class="text-center w-100">
+                        {% csrf_token %}
+                        
+                        <div class="upload-area p-5 mb-4 rounded-4" style="border: 2px dashed #cbd5e1; background-color: #f8fafc; transition: all 0.3s ease;" id="dropZone">
+                            <i class="bi bi-filetype-csv display-1 text-secondary opacity-50 mb-3 d-block"></i>
+                            <h5 class="fw-bold text-dark mb-2">{% translate "Haz clic para seleccionar tu archivo CSV" %}</h5>
+                            <p class="text-muted small mb-0">{% translate "Tamaño máximo recomendado: 5MB" %}</p>
+                            
+                            <input type="file" name="archivo_csv" id="archivoCsv" class="form-control mt-4 mx-auto" accept=".csv" required style="max-width: 300px;">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold d-inline-flex align-items-center gap-2" id="btnSubir" style="background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); border: none;">
+                            <i class="bi bi-cloud-upload-fill"></i> {% translate "Procesar Catálogo" %}
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Efecto visual simple al seleccionar archivo
+    document.getElementById('archivoCsv').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        if(fileName) {
+            document.getElementById('dropZone').style.borderColor = '#0ea5e9';
+            document.getElementById('dropZone').style.backgroundColor = 'rgba(14, 165, 233, 0.05)';
+        }
+    });
+</script>
+{% endblock %}

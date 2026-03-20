@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+
+{% block title %}{% translate "Inicio" %}{% endblock %}
+{% block mobile_title %}{% translate "Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3 py-md-4 min-vh-100" style="background-color: #f1f5f9;">
+    <div class="row g-3 g-md-4 mb-4 m-0">
+        <div class="col-12 col-md-6 px-0 px-md-2">
+            <div class="card card-farma border-0 shadow-sm rounded-4 h-100 w-100 bg-white transition-card-hover">
+                <div class="card-body p-4 p-md-5 d-flex align-items-center gap-4">
+                    
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm overflow-hidden" 
+                         style="width: 75px; height: 75px; background: linear-gradient(135deg, rgba(23, 132, 199, 0.1) 0%, rgba(23, 132, 199, 0.05) 100%); border: 2px solid rgba(23, 132, 199, 0.2); color: var(--brand-blue);">
+                        
+                        {% if user.foto_perfil %} <img src="{{ user.foto_perfil.url }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-fill fs-1"></i>
+                        {% endif %}
+
+                    </div>
+                    
+                    <div> 
+                        <h3 class="fw-bolder mb-1 text-dark fs-4 fs-md-3" style="letter-spacing: -1px;">
+                            {% translate "Hola" %}, {{ user.first_name|default:"Usuario" }} <span class="fs-4">👋</span>
+                        </h3>
+                        <p class="text-secondary small mb-1 fw-medium">{% translate "Tu resumen de gestión para hoy." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+        <div class="col-12 col-md-6 px-0 px-md-2">
+            <div class="card card-farma border-0 shadow-sm rounded-4 h-100 w-100 bg-white transition-card-hover">
+                <div class="card-body p-4 p-md-5 d-flex flex-column align-items-center justify-content-center h-100 position-relative">
+                    <div class="position-absolute rounded-circle" style="width: 150px; height: 150px; background: radial-gradient(circle, rgba(23, 132, 199, 0.05) 0%, rgba(255,255,255,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    
+                    <img src="{% static 'farmaview.png' %}" alt="Logo FarmaView" height="55" class="mb-2 object-fit-contain z-1" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05));">
+                    <span class="text-muted fw-semibold small z-1" style="letter-spacing: 2px; font-size: 0.75rem;text-transform: uppercase;">{% translate "Excelencia Comercial" %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4 m-0">
+        
+        <div class="col-6 col-md-4 px-1 px-md-2">
+            <a href="{% url 'visitas:nueva_visita' %}" class="card card-farma border-0 shadow-sm rounded-4 h-100 text-decoration-none transition-card-hover" 
+                style="background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%); border: 1px solid rgba(23, 132, 199, 0.1) !important;">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-center position-relative overflow-hidden">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm z-1" 
+                         style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--brand-blue) 0%, #0a4d7a 100%); color: white;">
+                        <i class="bi bi-geo-alt-fill fs-4"></i>
+                    </div>
+                    <span class="fw-bolder text-dark small z-1" style="letter-spacing: 0.5px;">{% translate "Registrar" %}<br>{% translate "Visita" %}</span>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 px-1 px-md-2">
+            <a href="{% url 'visitas:agendar_visita' %}" class="card card-farma border-0 shadow-sm rounded-4 h-100 text-decoration-none transition-card-hover bg-white"
+               style="border: 1px solid rgba(243, 122, 32, 0.1) !important;">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" 
+                         style="width: 56px; height: 56px; background-color: rgba(243, 122, 32, 0.1); color: var(--brand-orange); border: 1px solid rgba(243, 122, 32, 0.15);">
+                        <i class="bi bi-calendar-plus-fill fs-4"></i>
+                    </div>
+                    <span class="fw-bolder text-secondary small" style="letter-spacing: 0.5px;">{% translate "Agendar" %}<br>{% translate "Visita" %}</span>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-12 col-md-4 px-1 px-md-2">
+            <a href="{% url 'visitas:historial' %}" class="card card-farma border-0 shadow-sm rounded-4 h-100 text-decoration-none transition-card-hover bg-white"
+               style="border: 1px solid rgba(100, 116, 139, 0.1) !important;">
+                <div class="card-body d-flex flex-row flex-md-column align-items-center justify-content-start justify-content-md-center px-4 py-md-4 py-3 gap-3 gap-md-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-secondary shadow-sm" 
+                         style="width: 56px; height: 56px; flex-shrink: 0; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <span class="fw-bolder text-secondary text-start text-md-center small" style="letter-spacing: 0.5px;">{% translate "Historial de" %}<br class="d-none d-md-block"> {% translate "Visitas" %}</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 g-md-4 mb-4 m-0">
+       <div class="col-12 col-xl-7 px-0 px-md-2">
+            <div class="card border-0 rounded-4 shadow-lg w-100 transition-card-hover overflow-hidden mt-0" 
+                 style="background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #133a5e 100%); position: relative; min-height: 280px;">
+                
+                <div class="position-absolute rounded-circle" 
+                     style="width: 400px; height: 400px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); bottom: -150px; right: -100px; pointer-events: none;"></div>
+                
+                <div class="position-absolute rounded-circle" 
+                     style="width: 250px; height: 250px; background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(255, 255, 255, 0.04); top: -50px; right: 20px; pointer-events: none;"></div>
+                     
+                <div class="position-absolute rounded-circle" 
+                     style="width: 150px; height: 150px; background: transparent; border: 3px solid rgba(255, 255, 255, 0.03); top: 30%; right: 15%; pointer-events: none;"></div>
+                     
+                <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-between h-100 position-relative z-1">
+                    
+                    <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row mb-4 gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                 style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+                                <i class="bi bi-currency-dollar text-white fs-4"></i>
+                            </div>
+                            <span class="text-white text-opacity-75 fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.9rem;">
+                                {% translate "Rendimiento Mensual" %}
+                            </span>
+                        </div>
+                        
+                        <span class="badge rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2" 
+                              style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); color: #ffffff; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">
+                            <span class="dot-blinking-green"></span> 
+                            {% translate "En Curso" %}
+                        </span>
+                    </div>
+
+                    <div class="mb-4 mt-2">
+                        <div class="d-flex align-items-baseline gap-2 mb-1 flex-wrap">
+                            <h1 class="fw-bolder mb-0 text-white" style="font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -2px; line-height: 1;">
+                                ${{ ventas_totales_mes|intcomma }}
+                            </h1>
+                            <span class="fw-bold text-white-50" style="font-size: clamp(1.2rem, 2.5vw, 1.8rem);">/ ${{ meta_mensual_ventas|intcomma }}</span>
+                        </div>
+                        
+                        <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                            <p class="mb-0 fw-medium text-white-50 fs-6">{% translate "Ventas totales acumuladas este mes." %}</p>
+                            
+                            {% if ultima_venta %}
+                                <span class="badge rounded-pill fw-medium d-flex align-items-center gap-1 shadow-sm" 
+                                      style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; padding: 5px 10px;">
+                                    <i class="bi bi-clock-history"></i> {% translate "Última hace" %} {{ ultima_venta.fecha_creacion|timesince }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <span class="text-white fw-bold small">{% translate "Progreso de Meta" %}</span>
+                            <span class="fw-bolder fs-4" style="color: #38bdf8; line-height: 1;">{{ porcentaje_meta_ventas }}%</span>
+                        </div>
+                        <div class="progress rounded-pill shadow-inner" style="height: 12px; background-color: rgba(0, 0, 0, 0.3); overflow: visible;">
+                            <div class="progress-bar rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" 
+                                 style="width: {{ ancho_barra_meta_ventas }}%; background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%); box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5 d-flex flex-column gap-3 gap-md-4 px-0 px-md-2">
+            <div class="card card-farma border-0 rounded-4 shadow-sm flex-fill bg-white w-100 transition-card-hover">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background-color: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.2);">
+                            <i class="bi bi-lightning-charge-fill fs-5"></i>
+                        </div>
+                        <span class="text-muted fw-bold text-uppercase small" style="letter-spacing: 1px;">{% translate "Proyección Cierre" %}</span>
+                    </div>
+                    <h2 class="fw-bolder text-dark mb-0 mt-2 fs-3 fs-md-2" style="letter-spacing: -1px;">${{ proyeccion_cierre|intcomma }}</h2>
+                    <p class="text-muted small mb-0 mt-1 fw-medium">{% translate "Estimado según ritmo actual" %}</p>
+                </div>
+            </div>
+
+            <!--cobertura-->
+            <div class="card border-0 rounded-4 shadow-sm flex-fill bg-white w-100 transition-card-hover">
+    <div class="card-body p-4">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; background-color: rgba(23, 132, 199, 0.1);">
+                    <i class="bi bi-geo-alt-fill fs-5" style="color: #1784C7;"></i>
+                </div>
+                <h6 class="text-dark fw-bolder mb-0" style="letter-spacing: -0.5px; font-size: 1.15rem;">
+                    {% translate "Cobertura Territorial" %}
+                </h6>
+            </div>
+            <span class="badge rounded-pill px-3 py-2 fw-bold shadow-sm" style="background-color: rgba(23, 132, 199, 0.1); color: #1784C7; border: 1px solid rgba(23, 132, 199, 0.2); font-size: 0.8rem;">
+                {{ porcentaje_cobertura|default:"0" }}% {% translate "Completado" %}
+            </span>
+        </div>
+
+        <div class="d-flex align-items-baseline gap-2 mb-3">
+            <h2 class="fw-bolder text-dark mb-0" style="font-size: 2.8rem; letter-spacing: -1.5px;">
+                {{ visitas_realizadas|default:"0" }}
+            </h2>
+            <span class="fs-4 text-muted fw-medium">/ {{ meta_cobertura|default:"0" }}</span>
+            <span class="text-secondary small fw-medium ms-2">{% translate "visitas realizadas" %}</span>
+        </div>
+
+        <div class="progress rounded-pill shadow-sm mb-3" style="height: 14px; background-color: #f1f5f9;">
+            <div class="progress-bar rounded-pill" 
+                 role="progressbar" 
+                 style="width: {{ porcentaje_cobertura|default:'0' }}%; background: linear-gradient(90deg, #1784C7 0%, #38bdf8 100%);" 
+                 aria-valuenow="{{ porcentaje_cobertura|default:'0' }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        
+        <div class="text-end mt-1">
+            <a href="{% url 'visitas:cobertura' %}" class="text-decoration-none small fw-bold transition-hover" style="color: #1784C7;">
+                {% translate "Ver detalle del equipo" %} <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+            
+        </div>
+    </div>
+
+    <div class="row g-3 g-md-4 m-0 pb-5">
+        
+        <div class="col-12 col-lg-7 px-0 px-md-2 mb-4 mb-lg-0">
+            <div class="card card-farma border-0 rounded-4 shadow-sm h-100 bg-white w-100 transition-card-hover">
+                <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bolder text-dark mb-0 fs-5" style="letter-spacing: -0.5px;">{% translate "Agenda Diaria" %}</h5>
+                    <span class="badge bg-light text-secondary border rounded-pill px-3 py-2 fw-medium shadow-sm">{{ hoy|date:"l, F jS" }}</span>
+                </div>
+                
+                <div class="card-body p-4">
+                {% if visitas_agenda %}
+                <div class="position-relative ps-4" style="border-left: 2px dashed #cbd5e1;">
+                    {% for visita in visitas_agenda %}
+                    <div class="mb-4 position-relative">
+                        <div class="position-absolute rounded-circle shadow-sm border border-white border-2 d-flex align-items-center justify-content-center
+                            {% if visita.estado == 'Realizada' or visita.estado == 'Completada' %}bg-success
+                            {% elif visita.estado == 'Pendiente' %}bg-warning
+                            {% elif visita.estado == 'Cancelada' %}bg-danger
+                            {% else %}bg-primary{% endif %}" 
+                            style="width: 20px; height: 20px; left: -35px; top: 16px;">
+                        </div>
+                        
+                        
+                        <div class="p-3 rounded-4 shadow-sm bg-white border border-light transition-row" 
+                            style="border-left: 4px solid {% if visita.estado == 'Realizada' or visita.estado == 'Completada' %}#10B981{% elif visita.estado == 'Pendiente' %}#F59E0B{% elif visita.estado == 'Cancelada' %}#EF4444{% else %}var(--brand-blue){% endif %} !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 70%; font-size: 1.05rem;">{{ visita.institucion.nombre }}</h6>
+                                <span class="fw-bold text-primary small icon-circle-glass px-3 py-1 rounded-pill" style="font-size: 0.8rem;">
+                                    {{ visita.fecha_hora|date:"H:i" }}
+                                </span>
+                            </div>
+                            <div class="text-muted small d-flex align-items-center gap-2 mt-2 fw-medium">
+                                <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 24px; height: 24px;">
+                                    <i class="bi bi-person-fill text-secondary" style="font-size: 0.8rem;"></i>
+                                </div>
+                                {{ visita.contacto.nombre|default:"Sin contacto asignado" }}
+                            </div>
+                            <div class="observaciones-box">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-chat-left-text text-muted small mt-1"></i>
+                            <div>
+                            
+                        <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.7rem;">{% translate "Observaciones" %}:</span>
+                        <p class="mb-0 small text-secondary mt-1" style="line-height: 1.4;">
+                            {{ visita.notas|default:"Sin observaciones registradas." }}
+                        </p>
+                        <!--vista gerente-->
+                                {% if request.user.is_superuser or request.user.es_gerente %}
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">
+                                        <i class="bi bi-person-badge text-primary me-1"></i>
+                                        Rep: {{ visita.representante.get_full_name|default:visita.representante.username }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                    </div>
+                </div>
+            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 icon-circle-glass" style="width: 70px; height: 70px;">
+                        <i class="bi bi-cup-hot text-primary fs-2"></i>
+                    </div>
+                    <h5 class="fw-bolder text-dark mb-1">{% translate "Día Despejado" %}</h5>
+                    <p class="text-muted small mb-4 fw-medium">{% translate "No tienes visitas programadas para hoy." %}</p>
+                    <a href="{% url 'visitas:nueva_visita' %}" class="btn btn-brand rounded-pill px-4 py-2 shadow-sm fw-bold">{% translate "Agendar Visita" %}</a>
+                </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5 px-0 px-md-2">
+            <div class="card card-farma border-0 rounded-4 shadow-sm h-100 bg-white w-100 transition-card-hover">
+                <div class="card-header bg-transparent border-0 px-4 pt-4 pb-0">
+                    <h5 class="fw-bolder text-dark mb-0 fs-5" style="letter-spacing: -0.5px;">{% translate "Atención Requerida" %}</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if ultimas_pendientes %}
+                    <div class="d-flex flex-column gap-3">
+                      {% for pendiente in ultimas_pendientes %}
+                        <div class="p-3 rounded-4 bg-white shadow-sm border mb-3" style="border-left: 4px solid #F59E0B !important;">
+                            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex justify-content-center align-items-center flex-shrink-0" style="width: 44px; height: 44px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                        <i class="bi bi-exclamation-circle-fill fs-5"></i>
+                                    </div>
+                                    
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark text-truncate" style="font-size: 0.95rem; max-width: 180px;" title="{{ pendiente.institucion.nombre }}">
+                                            {{ pendiente.institucion.nombre }}
+                                        </h6>
+                                        <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                                {% translate "Atrasada" %}
+                                            </span>
+                                            
+                                            {% if request.user != pendiente.representante %}
+                                            <span class="text-secondary fw-medium d-flex align-items-center" style="font-size: 0.75rem; border-left: 1px solid #dee2e6; padding-left: 8px;">
+                                                <i class="bi bi-person-circle me-1 text-muted"></i>
+                                                {{ pendiente.representante.first_name|default:pendiente.representante.username }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <a href="{% url 'visitas:mi_agenda' %}?fecha={{ pendiente.fecha_hora|date:'Y-m-d' }}" class="btn btn-sm btn-light border rounded-pill text-dark shadow-sm px-3 fw-bold transition-hover">
+                                    {% translate "Resolver" %}
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <i class="bi bi-check2-circle text-success fs-1"></i>
+                        </div>
+                        <h5 class="fw-bolder text-dark mb-1">{% translate "Todo al Día" %}</h5>
+                        <p class="text-muted small mb-0 fw-medium">{% translate "No hay visitas atrasadas o pendientes importantes." %}</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

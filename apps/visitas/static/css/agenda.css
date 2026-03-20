@@ -1,0 +1,177 @@
+/* ==========================================================
+   ESTILOS PREMIUM PARA "DAILY PLANNER" (Mi Agenda)
+   ========================================================== */
+
+body {
+    background-color: #f8fafc; /* Un gris/azulado extremadamente suave, mejor que el blanco puro para la vista */
+}
+
+/* --- Tira de Fechas Superior (Date Strip) --- */
+.date-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.date-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #64748B;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.date-item:hover {
+    background-color: #f1f5f9;
+    color: #0047AB;
+}
+
+/* El día seleccionado (Círculo Azul) */
+.date-item.active {
+    color: #0047AB; 
+    background-color: transparent;
+}
+
+.date-item.active .date-number {
+    background-color: #0047AB;
+    color: #ffffff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 71, 171, 0.3);
+}
+
+.date-number {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 4px;
+    transition: all 0.2s ease;
+}
+
+/* Efecto hover para las flechas de navegación lateral */
+.nav-arrow {
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.nav-arrow:hover {
+    color: #0047AB !important;
+    transform: scale(1.1);
+}
+
+/* --- Línea de Tiempo Vertical (Timeline) --- */
+.timeline-container {
+    position: relative;
+    /* La línea vertical ahora se maneja desde el HTML con border-left */
+}
+
+.time-slot {
+    position: relative;
+    /* Quitamos el border-top rígido para un look más limpio, estilo Apple Calendar */
+}
+
+/* Ajuste de la hora que flota a la izquierda */
+.time-label {
+    position: absolute;
+    left: -65px; /* Lo movemos más a la izquierda para que no choque con la tarjeta */
+    top: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+}
+
+/* --- Tarjetas de Eventos (Visitas) --- */
+.event-card {
+    position: relative;
+    overflow: visible !important; /* Crucial para que el menú no se corte */
+    z-index: 1;
+}
+/* 2. Cuando el dropdown está abierto, subimos la tarjeta de nivel */
+.event-card:has(.show) {
+    z-index: 1000 !important;
+}
+
+/* Efectos de elevación al pasar el mouse (Nivel SaaS Premium) */
+.transition-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.transition-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08) !important;
+}
+
+/* --- Menú Desplegable (Dropdown) --- */
+.dropdown-item {
+    transition: background-color 0.15s ease;
+}
+/* 3. El menú debe ser el rey de la pantalla */
+.dropdown-menu {
+    z-index: 9999 !important;
+    /* Esto evita que se esconda detrás de la siguiente card */
+}
+
+.dropdown-item:hover {
+    background-color: #f1f5f9; /* Gris muy suave al pasar el mouse por las opciones */
+}
+
+/* --- Línea roja de hora actual (Para futuro uso con JS) --- */
+.current-time-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #EF4444; 
+    top: 50%; 
+    left: 0;
+    z-index: 10;
+    pointer-events: none; /* Evita que la línea bloquee los clics */
+}
+.current-time-line::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    background-color: #EF4444;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); /* Efecto de resplandor */
+}
+
+/* ==========================================================
+   DISEÑO RESPONSIVO (MÓVILES)
+   ========================================================== */
+
+@media (max-width: 576px) {
+    /* Ajustes finos para pantallas muy pequeñas (Ej: iPhone SE) */
+    .time-label {
+        left: 0;
+        top: -20px; /* En móviles, la hora se pone arriba de la tarjeta, no al lado */
+    }
+    
+    .timeline-container {
+        padding-left: 10px !important;
+    }
+    
+    .date-item { 
+        padding: 5px !important; 
+    }
+    
+    .date-number { 
+        font-size: 1.1rem !important; 
+    }
+    
+    .date-item.active .date-number {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+

@@ -1,0 +1,286 @@
+/* ==========================================================
+   1. VARIABLES GLOBALES (FarmaView)
+
+   #0047AB    azul oscuro
+   ========================================================== */
+:root {
+    --brand-blue: #0b3571;
+    --brand-orange: #F37A20;
+    --brand-light: #EBF4FA;
+    --bg-main: #F8F9FA;
+}
+
+
+/* ==========================================================
+   2. CONFIGURACIÓN BASE Y RESPONSIVA (El Escudo)
+   ========================================================== */
+/* Modelo de caja estricto */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Bloqueo total de scroll horizontal */
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-text-size-adjust: 100%; 
+}
+
+/* Tipografía Adaptativa (Magia para móviles) */
+html {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    html {
+        font-size: 14px; /* Todo se reduce un poco en celular */
+    }
+}
+
+body { 
+    background-color: #adc7e1; 
+    /* Gradiente sutil para eliminar lo 'plano' */
+    background: radial-gradient(at top left, #ffffff 0%, #7885923c 100%);
+    
+    /* Asegura que el fondo cubra toda la pantalla incluso si hay poco contenido */
+    min-height: 100vh;
+    background-attachment: fixed;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; 
+}
+
+/* Medios responsivos nativos */
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Prevenir zoom automático en inputs de iPhone */
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important; 
+    }
+}
+
+/* ==========================================================
+   3. CLASES UTILITARIAS Y COMPONENTES
+   ========================================================== */
+.bg-brand-blue { background-color: var(--brand-blue) !important; }
+.text-brand-blue { color: var(--brand-blue) !important; }
+.bg-brand-orange { background-color: var(--brand-orange) !important; }
+.bg-brand-light { background-color: var(--brand-light) !important; }
+
+/* Estilos del menú lateral */
+.nav-link { 
+    color: #6c757d; 
+    font-weight: 600; 
+    border-radius: 0.75rem; 
+    margin-bottom: 0.25rem; 
+}
+.nav-link:hover { background-color: #f8f9fa; color: #212529; }
+.nav-link.active { background-color: var(--brand-light); color: var(--brand-blue); }
+
+/* Tarjetas y Botones */
+.card-rounded { border-radius: 1.5rem; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+.btn-brand { background-color: var(--brand-blue); color: white; border-radius: 1rem; font-weight: bold; }
+.btn-brand:hover { background-color: #126b9e; color: white; }
+.btn-white { background-color: white; color: #495057; border-radius: 1rem; font-weight: bold; border: 1px solid #dee2e6; }
+.btn-white:hover { background-color: #f8f9fa; }
+
+/* --- ESTILOS GLOBALES DE TARJETAS (FarmaView) --- */
+.card-farma {
+    background-color: #ffffff;
+    border: none !important; 
+    border-radius: 1rem !important; 
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09), 0 5px 15px rgba(0, 0, 0, 0.09) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-farma:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Estilo para los elementos internos de la agenda */
+.agenda-item {
+    border: 1px solid #f0f2f5;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+.agenda-item:hover {
+    border-color: #e5e7eb;
+    background-color: #f8fafc; 
+}
+
+/* Color de fondo suave para la tarjeta de Meta Mensual */
+.bg-meta-card {
+    background-color: #cbcccf !important; 
+    border: 1px solid #eeecec !important; 
+}
+
+/* --- ICONOS DE SECCIONES --- */
+.section-icon { 
+    font-size: 1.3rem; 
+    margin-right: 12px; 
+}
+
+.icon-fecha { color: #6366F1; }       
+.icon-institucion { color: #126b9e; } 
+.icon-contacto { color: #38BDF8; }    
+.icon-productos { color: #10B981; }   
+.icon-gestion { color: #8B5CF6; }     
+.icon-obs { color: #64748B; }         
+
+
+ /* Efecto Elevación idéntico al Historial para Tarjetas */
+    .transition-card-hover {
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .transition-card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+        z-index: 10;
+    }
+    
+    /* Efecto especial para la tarjeta azul */
+    .bg-gradient-blue:hover {
+        box-shadow: 0 20px 40px rgba(15, 76, 117, 0.4) !important;
+    }
+
+    /* Efecto Hover botones y filas internas */
+    .transition-hover {
+        transition: all 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
+    }
+
+    .transition-row {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .transition-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+    }
+
+    /* Iconos Glassmorphism (Cristal) */
+    .icon-circle-glass {
+        background-color: rgba(23, 132, 199, 0.1);
+        color: var(--brand-blue);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(23, 132, 199, 0.15);
+    }
+
+    .shadow-inner {
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .shadow-inner-light {
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* ANIMACIÓN DEL PUNTO VERDE PARPADEANTE  DE TENDIMIENTO MENSUAL*/
+    @keyframes pulse-green {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+        }
+        70% {
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+    
+    .dot-blinking-green {
+        width: 10px;
+        height: 10px;
+        background-color: #10B981; /* Verde Esmeralda */
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse-green 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+
+
+
+
+
+/* ==========================================================
+   4. LAYOUT PRINCIPAL (Sidebar y Main)
+   ========================================================== */
+
+/* Comportamiento base (Móviles) */
+#sidebarMenu {
+    transition: transform 0.3s ease-in-out;
+}
+
+main {
+    width: 100%;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Comportamiento en PC (Pantallas grandes) */
+@media (min-width: 992px) {
+    #sidebarMenu { 
+        width: 280px; 
+        position: fixed; 
+        top: 0;
+        bottom: 0;
+        z-index: 1030;
+        overflow-y: auto;
+    }
+    
+    main { 
+        margin-left: 280px; 
+        /* Previene que el main se desborde al sumar los 280px del menú */
+        width: calc(100% - 280px); 
+    } 
+}
+
+
+/* AJUSTE RADICAL PARA MÓVILES */
+@media (max-width: 768px) {
+    /* 1. Resetear el tamaño de la caja base */
+    .form-select, 
+    .form-control {
+        font-size: 16px !important; /* 16px evita el zoom automático de iOS */
+        height: 38px !important;    /* Altura delgada y elegante */
+        min-height: 38px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        padding-left: 10px !important;
+        line-height: 38px !important; /* Centra el texto verticalmente */
+        border-radius: 8px !important;
+    }
+
+    /* 2. Forzar que las opciones (la lista abierta) no hereden tamaños gigantes */
+    .form-select option {
+        font-size: 14px !important;
+        padding: 5px !important;
+    }
+
+    /* 3. Ajustar el botón "+" que está al lado del select */
+    .input-group .btn {
+        height: 38px !important;
+        padding: 0 12px !important;
+        display: flex;
+        align-items: center;
+    }
+
+    /* 4. IMPORTANTE: Esto quita el espacio extra que mete Bootstrap por defecto */
+    .py-3, .py-md-3 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* 5. Achicar el texto del "Añadir Nuevo Contacto" */
+    .collapse-card h6 {
+        font-size: 0.85rem !important;
+    }
+}

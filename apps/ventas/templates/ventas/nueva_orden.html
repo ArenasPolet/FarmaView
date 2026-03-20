@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "Generar Orden" %}{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
+<div class="container-fluid px-2 px-md-4 py-3 py-md-4" style="background-color: #f8fafc; min-height: 100vh;">
+    
+    <div class="d-flex align-items-center gap-3 mb-4 pt-2">
+        <a href="{% url 'visitas:dashboard' %}" class="btn bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center border-0 transition-hover" style="width: 42px; height: 42px;">
+            <i class="bi bi-arrow-left fs-5 text-dark"></i>
+        </a>
+        <div>
+            <nav style="font-size: 1rem; font-weight: 400; margin-bottom: -5px;">
+                    <a href="{% url 'visitas:dashboard' %}" class="text-decoration-none" style="color: #64748b;">
+                        {% translate "Dashboard" %}
+                    </a> 
+                    <span style="color: #8e99bc;">
+                        &nbsp;>&nbsp; {% translate "Nueva Orden" %}
+                    </span>
+            </nav>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-light">
+        <h2 class="fw-bolder text-dark mb-0 display-6" style="letter-spacing: -1.5px;">{% translate "Generar Orden" %}</h2>
+    </div>
+
+    <form method="POST" action="{% url 'ventas:nueva_orden' %}" id="formOrden">
+        {% csrf_token %}
+        <div class="row g-4">
+            
+            <div class="col-12 col-xl-5 d-flex flex-column gap-4">
+                
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white transition-card-hover">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                                 style="width: 36px; height: 36px; background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);">1</div>
+                            <h5 class="fw-bolder mb-0 text-dark" style="letter-spacing: -0.5px;">{% translate "Datos del Cliente" %}</h5>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">{% translate "Institución / Farmacia" %} <span class="text-danger">*</span></label>
+                            <div class="shadow-sm rounded-3">
+                                <select name="institucion" id="selectInstitucion" class="form-select form-select-lg border-0 bg-light" data-url="{% url 'visitas:cargar_contactos_ajax' %}" required>
+                                    <option value="">{% translate "Buscar cliente..." %}</option>
+                                    {% for inst in instituciones %}
+                                        <option value="{{ inst.id }}">{{ inst.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">{% translate "Contacto (Quien solicita)" %}</label>
+                            <div class="rounded-3">
+                                <select name="contacto" id="selectContacto" class="form-select border-light bg-light text-secondary" disabled>
+                                    <option value="">{% translate "Esperando institución..." %}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">{% translate "Notas u Observaciones" %}</label>
+                            <textarea name="notas_internas" class="form-control border-light bg-light custom-focus" rows="2" placeholder="{% translate 'Condiciones de despacho, convenios, etc...' %}"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white transition-card-hover">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                                 style="width: 36px; height: 36px; background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);">2</div>
+                            <h5 class="fw-bolder mb-0 text-dark" style="letter-spacing: -0.5px;">{% translate "Agregar Productos" %}</h5>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 0.5px;">{% translate "Catálogo" %}</label>
+                            <div class="shadow-sm rounded-3">
+                                <select id="selectProducto" class="form-select border-0 bg-light">
+                                    <option value="">{% translate "Buscar producto por nombre o SKU..." %}</option>
+                                    {% for prod in productos %}
+                                        <option value="{{ prod.id }}" 
+                                                data-nombre="{{ prod.nombre }}" 
+                                                data-precio="{{ prod.precio_lista|default:'0' }}"
+                                                data-stock="{{ prod.stock|default:'0' }}">
+                                            {{ prod.nombre }} - ${{ prod.precio_lista|default:'0' }} (Stock: {{ prod.stock }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 align-items-end p-3 rounded-4" style="background-color: #f8fafc; border: 1px dashed #cbd5e1;">
+                            <div class="col-7 col-sm-8">
+                                <label class="form-label fw-bold text-secondary small text-uppercase mb-1" style="letter-spacing: 0.5px;">{% translate "Cantidad (Cajas)" %}</label>
+                                <input type="number" id="inputCantidad" class="form-control border-light bg-white shadow-sm fw-bold text-dark fs-5" min="1" value="1">
+                            </div>
+                            <div class="col-5 col-sm-4">
+                                <button type="button" id="btnAgregar" class="btn btn-dark w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="height: 48px;">
+                                    <i class="bi bi-plus-circle"></i> {% translate "Añadir" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-7">
+                <div class="card card-farma border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column transition-card-hover">
+                    <div class="card-body p-4 p-md-5 d-flex flex-column h-100">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                                     style="width: 36px; height: 36px; background: linear-gradient(135deg, #10b981 0%, #047857 100%);">3</div>
+                                <h5 class="fw-bolder mb-0 text-dark" style="letter-spacing: -0.5px;">{% translate "Resumen de la Orden" %}</h5>
+                            </div>
+                            <span class="badge bg-light text-secondary border rounded-pill px-3 py-2 fw-medium shadow-sm"><i class="bi bi-cart3 me-1"></i>Cart</span>
+                        </div>
+                        
+                        <div class="table-responsive flex-grow-1 mb-4 rounded-4 border border-light custom-scrollbar" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-borderless align-middle mb-0" id="tablaCarrito">
+                                <thead style="position: sticky; top: 0; background-color: #f8fafc; z-index: 1;">
+                                    <tr style="border-bottom: 2px solid #e2e8f0;">
+                                        <th class="text-secondary fw-bold small text-uppercase py-3 ps-4" style="letter-spacing: 0.5px;">{% translate "Producto" %}</th>
+                                        <th class="text-secondary fw-bold small text-uppercase py-3 text-center" style="letter-spacing: 0.5px; width: 15%;">{% translate "Cant." %}</th>
+                                        <th class="text-secondary fw-bold small text-uppercase py-3 text-end" style="letter-spacing: 0.5px; width: 25%;">{% translate "Subtotal" %}</th>
+                                        <th class="text-secondary fw-bold small text-uppercase py-3 text-center pe-4" style="letter-spacing: 0.5px; width: 10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carritoBody">
+                                    <tr id="filaVacia">
+                                        <td colspan="4" class="text-center py-5">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-muted opacity-50">
+                                                <i class="bi bi-inboxes fs-1 mb-3"></i>
+                                                <h6 class="fw-bold mb-1">{% translate "El carrito está vacío" %}</h6>
+                                                <small>{% translate "Agrega productos desde el panel izquierdo" %}</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-auto p-4 rounded-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); position: relative; overflow: hidden;">
+                            <i class="bi bi-receipt position-absolute" style="font-size: 8rem; color: rgba(255,255,255,0.03); right: -20px; bottom: -30px; transform: rotate(-15deg);"></i>
+                            
+                            <div class="position-relative z-1">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="fs-6 fw-bold text-white-50 text-uppercase" style="letter-spacing: 1px;">{% translate "Total Neto Estimado" %}</span>
+                                    <h2 class="fw-bolder text-white mb-0" id="totalEstimado" style="letter-spacing: -1px;">$0</h2>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 btn-guardar-premium" id="btnGuardar">
+                                    <i class="bi bi-check2-circle fs-5"></i> {% translate "Confirmar y Generar Orden" %}
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<style>
+    
+   
+    
+    /* Inputs y Textareas con mejor borde al enfocar */
+    .custom-focus:focus {
+        background-color: #fff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.1) !important;
+    }
+
+    /* Ajuste para que las filas agregadas al carrito se vean premium */
+    #carritoBody tr:not(#filaVacia) {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.1s;
+    }
+    #carritoBody tr:not(#filaVacia):hover {
+        background-color: #f8fafc;
+    }
+    #carritoBody td {
+        padding: 1rem 0.5rem;
+    }
+
+    /* Botón de eliminar en el carrito */
+    .btn-delete-row {
+        width: 32px; height: 32px;
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        border-radius: 50%;
+        color: #ef4444; background: rgba(239, 68, 68, 0.1);
+        transition: all 0.2s;
+    }
+    .btn-delete-row:hover {
+        background: #ef4444; color: white;
+    }
+
+    /* Botón guardar vibrante */
+    .btn-guardar-premium {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 14px 20px;
+        font-size: 1.1rem;
+    }
+    .btn-guardar-premium:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Scrollbar minimalista para la tabla */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    
+    /* Tom select custom tweaks */
+    .ts-wrapper .ts-control { border-radius: 0.5rem; border: none !important; background-color: #f8fafc; padding: 12px 15px;}
+    .ts-wrapper.focus .ts-control { background-color: #ffffff; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.1); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script src="{% static 'js/nueva_orden.js' %}"></script>
+{% endblock %}

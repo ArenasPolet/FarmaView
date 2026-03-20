@@ -268,52 +268,53 @@ window.guardarInstitucionRapido = function(url, csrf) {
     .catch(err => console.error("Error en fetch contacto:", err));
 };
   
-// --- Dictado por voz (Versión Escritura en Vivo) ---
+// --- Dictado por voz (Versión Continua + Rastreador de errores) ---
 window.iniciarDictado = function() {
+    console.log("1. Botón presionado. Iniciando...");
+    
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
         recognition.lang = "es-CL"; 
-        recognition.continuous = false; 
-        recognition.interimResults = true; // ✨ LA MAGIA: Muestra los resultados en tiempo real
+        recognition.continuous = true; // 🔴 CAMBIO CLAVE: Ahora no se apagará a la primera pausa
+        recognition.interimResults = true; 
         
         const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
         const textarea = document.getElementById('notas_textarea');
         const contenidoOriginal = btnDictar.innerHTML; 
         
-        let textoGuardado = textarea.value; // Guardamos lo que ya estaba escrito en la caja
+        let textoGuardado = textarea.value; 
 
         recognition.onstart = function() {
+            console.log("2. Micrófono encendido. Habla ahora...");
             btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-danger"></i> Escuchando...';
-            btnDictar.style.color = "#dc3545"; // Se pone rojo para avisar que está grabando
+            btnDictar.style.color = "#dc3545"; 
         };
 
-        // Esta función ahora se dispara cada vez que dices una palabra
         recognition.onresult = function(event) { 
+            console.log("3. ¡Te escuché! Procesando voz...");
             let textoTemporal = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    // Si terminó la frase, la guarda permanentemente
                     textoGuardado += (textoGuardado.length > 0 ? " " : "") + event.results[i][0].transcript;
                 } else {
-                    // Si sigue hablando, lo muestra temporalmente
                     textoTemporal += event.results[i][0].transcript;
                 }
             }
-            // Actualiza la caja de texto en vivo
             textarea.value = textoGuardado + (textoTemporal ? " " + textoTemporal : ""); 
         };
 
         recognition.onend = function() {
+            console.log("4. El micrófono se ha apagado.");
             btnDictar.innerHTML = contenidoOriginal;
-            btnDictar.style.color = ""; // Vuelve a la normalidad
+            btnDictar.style.color = ""; 
         };
 
         recognition.onerror = function(event) {
-            console.error("Error del micrófono:", event.error);
+            console.error("🚨 ERROR DETECTADO:", event.error);
             if (event.error === 'not-allowed') {
-                alert("Debes permitir el acceso al micrófono en la barra de direcciones (candado) y usar HTTPS.");
+                alert("Debes permitir el micrófono.");
             }
             btnDictar.innerHTML = contenidoOriginal; 
         };
@@ -321,6 +322,6 @@ window.iniciarDictado = function() {
         recognition.start();
 
     } else { 
-        alert("Tu navegador actual no soporta el dictado por voz. Usa Safari o Google Chrome actualizados."); 
+        alert("Navegador no compatible."); 
     }
 };

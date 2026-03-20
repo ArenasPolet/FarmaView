@@ -12,5 +12,5 @@ urlpatterns = [
     path('detalle-institucion/<int:institucion_id>/<int:mes>/<int:anio>/', views.detalle_institucion_view, name='detalle_institucion'),
     path('exportar/pedidos/', views.exportar_pedidos_excel, name='exportar_pedidos_excel'),
     path('exportar/metas/', views.exportar_metas_excel, name='exportar_metas_excel'),
-
+    
 ]

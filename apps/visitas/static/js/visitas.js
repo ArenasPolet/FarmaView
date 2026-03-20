@@ -269,6 +269,7 @@ window.guardarInstitucionRapido = function(url, csrf) {
 };
   
 // --- Dictado por voz (Estilo WhatsApp: Mantener presionado) ---
+// --- Dictado por voz (Estilo WhatsApp: Diseño Mejorado y Mantener presionado) ---
 document.addEventListener('DOMContentLoaded', function() {
     const btnDictar = document.getElementById('btn_dictar');
     const textarea = document.getElementById('notas_textarea');
@@ -279,18 +280,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const recognition = new SpeechRecognition();
             
             recognition.lang = "es-CL"; 
-            recognition.continuous = true; 
-            recognition.interimResults = true; 
+            recognition.continuous = true; // Permite pausas mientras mantienes presionado
+            recognition.interimResults = true; // Muestra resultados en vivo
             
             let textoGuardado = "";
-            let contenidoOriginal = btnDictar.innerHTML;
+            let contenidoOriginal = btnDictar.innerHTML; // Guardamos el diseño primary
 
             recognition.onstart = function() {
-                // Al presionar: Cambia a rojo y dice Grabando
-                btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-white"></i> Grabando...';
-                btnDictar.style.backgroundColor = "#dc3545"; 
+                // Al presionar: Cambia a ROJO vibrante y dice Grabando
+                btnDictar.innerHTML = '<i class="bi bi-mic-fill me-1 text-white fs-5"></i> <span class="small fw-bold text-white">Grabando...</span>';
+                btnDictar.style.backgroundColor = "#dc3545"; // Color rojo de grabación
                 btnDictar.style.color = "white";
-                textoGuardado = textarea.value; 
+                textoGuardado = textarea.value; // Guardar texto previo
             };
 
             recognition.onresult = function(event) { 
@@ -306,10 +307,10 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             recognition.onend = function() {
-                // Al soltar: Vuelve a la normalidad
+                // Al soltar: Vuelve a la normalidad (Fondo oscuro, ícono blanco y Dictar)
                 btnDictar.innerHTML = contenidoOriginal;
-                btnDictar.style.backgroundColor = "#edf2ff";
-                btnDictar.style.color = "#2b3a67";
+                btnDictar.style.backgroundColor = ""; // Limpiar el color manual
+                // El CSS base del HTML restaurará el fondo oscuro profesional
             };
 
             // --- LÓGICA DE PRESIONAR Y SOLTAR ---
@@ -320,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const detenerGrabacion = (e) => {
                 e.preventDefault();
-                recognition.stop(); // 🛑 Apaga el micrófono inmediatamente
+                recognition.stop(); // 🛑 Detiene inmediatamente al soltar el dedo
             };
 
             // Eventos para el Celular (Tocar la pantalla)

@@ -14,7 +14,7 @@
                 <i class="bi bi-arrow-left"></i> {% translate "Volver" %}
             </a>
             <div class="d-flex flex-wrap gap-2">
-                <button onclick="compartirOrden('{{ pedido.id }}', '{{ pedido.contacto.nombre|escapejs }}', '{{ pedido.total_neto|intcomma }}')" 
+                <button onclick="compartirPDF()" 
                         class="btn shadow-sm fw-bold border-0 rounded-pill px-4 d-flex align-items-center gap-2" 
                         style="background-color: #0b3571; color: white;">
                     <i class="bi bi-share-fill fs-5"></i> 
@@ -144,46 +144,59 @@
 {% endblock %}
 
 {% block extra_js %}
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-    function compartirOrden(pedidoId, contactoNombre, total) {
-    const textoCompartir = `Hola ${contactoNombre}, te adjunto el detalle de tu Orden de Transferencia #${pedidoId} por un total de $${total}. ¡Gracias por preferirnos!`;
-    const urlCompartir = window.location.href; // Toma la URL actual de la orden
-
-    if (navigator.share) {
-        navigator.share({
-            title: 'Orden de Transferencia #' + pedidoId,
-            text: textoCompartir,
-            url: urlCompartir
-        })
-        .then(() => console.log('Contenido compartido'))
-        .catch((error) => console.log('Error al compartir', error));
-    } else {
-        // Fallback: Si el navegador no soporta compartir (ej. PC antiguos), copia al portapapeles
-        const tempInput = document.createElement("input");
-        tempInput.value = textoCompartir + " " + urlCompartir;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        alert("Enlace y detalle copiados al portapapeles");
-    }
-}
+    // 1. TU FUNCIÓN ORIGINAL (Para descargar directo en el PC)
     function generarPDF() {
         const elemento = document.getElementById('documentoFactura');
-        
-        // Opciones del PDF (A4, alta calidad)
         const opt = {
-            margin:       0.2, // Margen ligero para asegurar que no se corten los bordes
+            margin:       0.2, 
+            filename:     `Orden_Transferencia_#{{ pedido.id }}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(elemento).save();
+    }
+
+    // 2. LA NUEVA FUNCIÓN (Para compartir por WhatsApp/Celular)
+    async function compartirPDF() {
+        const elemento = document.getElementById('documentoFactura');
+        
+        // Tus mismas opciones exactas
+        const opt = {
+            margin:       0.2, 
             filename:     `Orden_Transferencia_#{{ pedido.id }}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
-        // Generar y descargar
-        html2pdf().set(opt).from(elemento).save();
+        try {
+            // En lugar de .save(), usamos .output('blob') para crear el archivo en secreto
+            const pdfBlob = await html2pdf().set(opt).from(elemento).output('blob');
+            
+            // Empaquetamos el PDF en un archivo real
+            const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
+
+            // Comprobamos si es un celular que soporta compartir documentos
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: `Orden #${{ pedido.id }}`,
+                    text: `Adjunto la Orden #${{ pedido.id }} generada en FarmaView.`
+                });
+            } else {
+                // Si están en un PC viejo que no tiene WhatsApp Web, lo descarga normal
+                alert("Tu dispositivo no soporta compartir directamente. Se descargará el PDF.");
+                html2pdf().set(opt).from(elemento).save();
+            }
+        } catch (error) {
+            console.error('Error al compartir:', error);
+            alert("Hubo un error al intentar compartir el documento.");
+        }
     }
 </script>
 {% endblock %}

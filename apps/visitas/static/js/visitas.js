@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalO = modalElementOtro ? new bootstrap.Modal(modalElementOtro) : null;
 
     // =========================================================================
-// FILTRO DINÁMICO DE CONTACTOS POR INSTITUCIÓN (Versión Corregida)
-// =========================================================================
-const selectInstitucion = document.getElementById('id_institucion');
-const selectContacto = document.getElementById('id_contacto');
+        // FILTRO DINÁMICO DE CONTACTOS POR INSTITUCIÓN (Versión Corregida)
+        // =========================================================================
+        const selectInstitucion = document.getElementById('id_institucion');
+        const selectContacto = document.getElementById('id_contacto');
 
 if (selectInstitucion && selectContacto) {
     // Estado inicial
@@ -64,6 +64,7 @@ if (selectInstitucion && selectContacto) {
         }
     });
 }
+});
     // --- ESCUCHADORES PARA BOTONES AJAX (INSTITUCIÓN Y CONTACTO) ---
     
    // Botón Guardar Institución
@@ -266,15 +267,55 @@ window.guardarInstitucionRapido = function(url, csrf) {
     })
     .catch(err => console.error("Error en fetch contacto:", err));
 };
-    // --- Dictado por voz ---
-    window.iniciarDictado = function() {
-        if ('webkitSpeechRecognition' in window) {
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = "es-ES";
-            recognition.onresult = (event) => { 
-                document.getElementById('notas_textarea').value += " " + event.results[0][0].transcript; 
-            };
-            recognition.start();
-        } else { alert("Navegador no soporta dictado."); }
-    };
-});
+  
+// --- Dictado por voz (Versión Pro) ---
+window.iniciarDictado = function() {
+    // Verificamos soporte (añadimos la versión estándar y la de webkit)
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        // Ajustamos el idioma (es-CL suele detectar mejor los modismos y acentos locales)
+        recognition.lang = "es-CL"; 
+        
+        // Capturamos el botón y el textarea
+        const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
+        const textarea = document.getElementById('notas_textarea');
+        const contenidoOriginal = btnDictar.innerHTML; // Guardamos cómo se veía el botón
+
+        // 1. ¿Qué pasa cuando empieza a escuchar?
+        recognition.onstart = function() {
+            // Cambiamos el botón para avisar que está grabando
+            btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2 text-danger"></i> Escuchando...';
+            btnDictar.style.borderColor = "#ffcccc";
+        };
+
+        // 2. ¿Qué pasa cuando detecta la voz?
+        recognition.onresult = function(event) { 
+            const textoDictado = event.results[0][0].transcript;
+            // Solo agrega un espacio si ya había texto antes, para no dejar espacios vacíos al inicio
+            textarea.value += (textarea.value.length > 0 ? " " : "") + textoDictado; 
+        };
+
+        // 3. ¿Qué pasa cuando termina de escuchar?
+        recognition.onend = function() {
+            // Restauramos el botón a su estado normal
+            btnDictar.innerHTML = contenidoOriginal;
+            btnDictar.style.borderColor = "";
+        };
+
+        // 4. ¿Qué pasa si el usuario no dio permisos de micrófono?
+        recognition.onerror = function(event) {
+            if (event.error === 'not-allowed') {
+                alert("Por favor, permite el acceso al micrófono en tu navegador para usar esta función.");
+            }
+            btnDictar.innerHTML = contenidoOriginal; // Restaurar botón
+        };
+
+        // Iniciamos la magia
+        recognition.start();
+
+    } else { 
+        alert("Tu navegador actual no soporta el dictado por voz. Te recomendamos usar Google Chrome."); 
+    }
+};

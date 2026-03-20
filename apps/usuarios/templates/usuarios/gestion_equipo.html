@@ -25,7 +25,7 @@
                         {{ usuarios.paginator.count }} {% translate "Integrantes" %}
                     </div>
                 </div>
-                <div class="table-responsive" style="overflow: visible;"> <table class="table table-hover align-middle mb-0">
+                <div class="table-responsive"> <table class="table table-hover align-middle mb-0 text-nowrap">
                         <thead style="background-color: #f8fafc;">
                             <tr>
                                 <th class="px-4 py-3 border-0 text-muted small text-uppercase fw-bold">{% translate "Usuario" %}</th>
@@ -173,6 +173,7 @@
 
 <style>
     /* Tu CSS original sin cambios */
+    
     :root { --modern-border: #e2e8f0; --modern-focus: #3b82f6; }
     .form-section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
     .form-section-header::after { content: ""; height: 1px; flex-grow: 1; background: #e2e8f0; }

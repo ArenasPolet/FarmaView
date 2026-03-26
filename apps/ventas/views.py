@@ -13,10 +13,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
-from .models import MetaMensual
+
+from apps.visitas.models import RegistroVisita, Visita
+from .models import MetaInstitucion, MetaMensual
 from apps.clientes.models import Institucion
 from apps.productos.models import Producto
-from .models import Pedido, DetallePedido, MetaMensual
+from .models import Pedido, DetallePedido, MetaMensual, MetaInstitucion
 import calendar
 from django.shortcuts import get_object_or_404
 from django.db import transaction # Permite deshacer cambios si hay un error
@@ -42,78 +44,107 @@ MAPEO_MESES_EXCEL = {
 
 Usuario = get_user_model()
 
+#DE METAS
 @login_required(login_url='usuarios:login')
 def metas_view(request):
     hoy_real = timezone.now().date()
     mes_sel = int(request.GET.get('mes', hoy_real.month))
     anio_sel = int(request.GET.get('anio', hoy_real.year))
 
-    # =========================================================
-    # 1. EL CEREBRO DE LA JERARQUÍA (¿A quién puedo ver?)
-    # =========================================================
+    # 1. JERARQUÍA
     if request.user.is_superuser:
-        # El Dueño del sistema ve las ventas de toda la base de datos
         vendedores_permitidos = Usuario.objects.all()
     elif request.user.es_gerente:
-        # El Gerente ve sus propias ventas (si tiene) + las de su equipo
         vendedores_permitidos = Usuario.objects.filter(Q(id=request.user.id) | Q(jefe=request.user))
     else:
-        # El Vendedor normal solo se ve a sí mismo
         vendedores_permitidos = Usuario.objects.filter(id=request.user.id)
 
-    # =========================================================
-    # 2. CÁLCULOS APLICANDO EL FILTRO JERÁRQUICO
-    # =========================================================
-    
-    # Sumamos las metas de todos los vendedores permitidos
-    meta_total_mes = MetaMensual.objects.filter(
+    # 2. CÁLCULOS GENERALES (Para las tarjetas de arriba)
+    # Sumamos todas las metas de las instituciones para este mes/vendedores
+    meta_total_mes = MetaInstitucion.objects.filter(
         representante__in=vendedores_permitidos, 
         mes=mes_sel, 
         anio=anio_sel
     ).aggregate(total=Sum('monto_meta'))['total'] or 0
 
-    # Filtramos los pedidos solo de los vendedores permitidos
     ventas_base = Pedido.objects.filter(
         representante__in=vendedores_permitidos,
         fecha_creacion__year=anio_sel,
         fecha_creacion__month=mes_sel,
         estado__in=['Ingresado', 'Facturado']
     )
-
     ventas_actuales = ventas_base.aggregate(total=Sum('total_final'))['total'] or 0
+    cantidad_pedidos_totales = ventas_base.count()
 
-    # Agrupamos por institución para la tabla inferior
-    ventas_por_institucion = ventas_base.values(
+    # 3. MAGIA PARA LA TABLA DE INSTITUCIONES
+    metas_inst = MetaInstitucion.objects.filter(
+        representante__in=vendedores_permitidos, mes=mes_sel, anio=anio_sel
+    ).select_related('institucion')
+
+    datos_instituciones = {}
+
+    for meta in metas_inst:
+        datos_instituciones[meta.institucion.id] = {
+            'institucion__id': meta.institucion.id,
+            'institucion__nombre': meta.institucion.nombre,
+            'institucion__rut': meta.institucion.rut,
+            'monto_meta': meta.monto_meta,
+            'total_vendido': 0,
+            'cantidad_ordenes': 0,
+        }
+
+    ventas_instituciones = ventas_base.values(
         'institucion__id', 'institucion__nombre', 'institucion__rut'
-    ).annotate(
-        total_vendido=Sum('total_final'),
-        cantidad_ordenes=Count('id')
-    ).order_by('-total_vendido')
+    ).annotate(total_vendido=Sum('total_final'), cantidad_ordenes=Count('id'))
 
-    # 3. MATEMÁTICAS (Porcentajes, brechas, ritmos)
+    for v in ventas_instituciones:
+        inst_id = v['institucion__id']
+        if inst_id not in datos_instituciones:
+            datos_instituciones[inst_id] = {
+                'institucion__id': inst_id,
+                'institucion__nombre': v['institucion__nombre'],
+                'institucion__rut': v['institucion__rut'],
+                'monto_meta': 0,
+                'total_vendido': 0,
+                'cantidad_ordenes': 0,
+            }
+        datos_instituciones[inst_id]['total_vendido'] = v['total_vendido']
+        datos_instituciones[inst_id]['cantidad_ordenes'] = v['cantidad_ordenes']
+
+    for inst_id, data in datos_instituciones.items():
+        agendas = Visita.objects.filter(institucion_id=inst_id, representante__in=vendedores_permitidos, fecha_hora__year=anio_sel, fecha_hora__month=mes_sel).count()
+        terreno = RegistroVisita.objects.filter(institucion_id=inst_id, representante__in=vendedores_permitidos, fecha_hora__year=anio_sel, fecha_hora__month=mes_sel).count()
+        
+        data['cantidad_visitas'] = agendas + terreno
+        data['cumplimiento'] = int((data['total_vendido'] / data['monto_meta']) * 100) if data['monto_meta'] > 0 else (100 if data['total_vendido'] > 0 else 0)
+
+    ventas_por_institucion = sorted(datos_instituciones.values(), key=lambda x: x['total_vendido'], reverse=True)
+
+    # 4. MATEMÁTICAS SUPERIORES
     porcentaje = int((ventas_actuales / meta_total_mes) * 100) if meta_total_mes > 0 else 0
     brecha = max(0, meta_total_mes - ventas_actuales)
-    
     dias_totales = calendar.monthrange(anio_sel, mes_sel)[1]
     dias_restantes = max(0, dias_totales - hoy_real.day) if mes_sel == hoy_real.month else 0
     ritmo = int(brecha / dias_restantes) if dias_restantes > 0 else 0
     
-    bono_maximo = 500000 
-    bono_estimado = int((porcentaje / 100) * bono_maximo) if porcentaje <= 100 else bono_maximo
-    
+    # NUEVO CÁLCULO: Ticket Promedio
+    ticket_promedio = int(ventas_actuales / cantidad_pedidos_totales) if cantidad_pedidos_totales > 0 else 0
+
     contexto = {
         'mes_sel': mes_sel,
         'anio_sel': anio_sel,
-        'mes_nombre': NOMBRES_MESES.get(mes_sel),
+        'mes_nombre': NOMBRES_MESES.get(mes_sel, 'Mes'),
         'nombres_meses': NOMBRES_MESES,
         'ventas_actuales': ventas_actuales,
         'meta_mensual': meta_total_mes,
         'porcentaje_avance': min(porcentaje, 100),
         'brecha': brecha,
         'ritmo_requerido': ritmo,
-        'bono_estimado': bono_estimado,
         'dias_restantes': dias_restantes,
+        'ticket_promedio': ticket_promedio, # <--- ENVIAMOS ESTO
+        'cantidad_pedidos': cantidad_pedidos_totales,
         'ventas_por_institucion': ventas_por_institucion, 
+        'pedidos': ventas_base
     }
     
     return render(request, 'ventas/metas.html', contexto)
@@ -128,8 +159,7 @@ def es_gerente_check(user):
     return user.is_authenticated and user.es_gerente
 
 
-#FUNCION PEDIDOS
-
+#FUNCION PEDIDOS NUEVA ORDEN DE PEDIDOS
 @login_required(login_url='usuarios:login')
 def nueva_orden_view(request):
     # ==========================================
@@ -224,8 +254,7 @@ def nueva_orden_view(request):
     return render(request, 'ventas/nueva_orden.html', context)
 
 
-#FUNCION detalle VENTAS
-# FUNCION PDF VENTAS
+#FUNCION detalle VENTAS # FUNCION PDF VENTAS
 @login_required(login_url='usuarios:login')
 def detalle_orden_view(request, pedido_id):
     # =========================================================
@@ -406,7 +435,6 @@ def analitica_view(request):
 
 
 #CARGAR DATOS DE EXCEL VISTA MAESTRA
-
 User = get_user_model()
 @login_required(login_url='usuarios:login')
 def cargar_datos_excel(request):
@@ -453,16 +481,29 @@ def cargar_datos_excel(request):
                     df_metas.columns = [str(c).strip().lower() for c in df_metas.columns]
                     
                     for _, row in df_metas.iterrows():
+                        # Leemos exactamente las columnas de tu Excel
+                        rut_val = str(row.get('rut-3', '')).strip()
+                        razon_social = str(row.get('razon social', '')).strip()
                         rep = str(row.get('representante', '')).strip()
                         mes_txt = str(row.get('mes', '')).strip().lower()
                         
-                        if not rep or not mes_txt: 
+                        # Validamos que al menos tengamos vendedor, mes y un identificador de la clínica
+                        if not rep or not mes_txt or (not rut_val and not razon_social): 
                             continue
                             
                         vendedor = User.objects.filter(username=rep).first()
                         mes_n = MAPEO_MESES_EXCEL.get(mes_txt) 
                         
-                        if vendedor and mes_n:
+                        # Buscamos la institución prioritariamente por RUT
+                        inst = None
+                        if rut_val:
+                            inst = Institucion.objects.filter(rut=rut_val).first()
+                        # Si no la encuentra por RUT, intenta por Razón Social
+                        if not inst and razon_social:
+                            inst = Institucion.objects.filter(nombre__iexact=razon_social).first()
+                        
+                        # Si todo está correcto, guardamos la meta
+                        if vendedor and mes_n and inst:
                             try:
                                 anio_val = row.get('año', '2026')
                                 anio_int = int(float(anio_val)) if anio_val else 2026
@@ -470,10 +511,18 @@ def cargar_datos_excel(request):
                                 meta_val = row.get('meta', '0')
                                 meta_int = int(float(meta_val)) if meta_val else 0
                                 
-                                meta_obj, _ = MetaMensual.objects.get_or_create(representante=vendedor, mes=mes_n, anio=anio_int, defaults={'monto_meta': 0})
-                                meta_obj.monto_meta += meta_int
+                                # Guardamos o actualizamos en el nuevo modelo
+                                meta_obj, _ = MetaInstitucion.objects.get_or_create(
+                                    institucion=inst, 
+                                    representante=vendedor, 
+                                    mes=mes_n, 
+                                    anio=anio_int, 
+                                    defaults={'monto_meta': 0}
+                                )
+                                meta_obj.monto_meta = meta_int
                                 meta_obj.save()
                                 metas_agregadas += 1
+                                
                             except ValueError:
                                 pass
 
@@ -483,6 +532,28 @@ def cargar_datos_excel(request):
                     df_ventas = pd.read_excel(xls, sheet_name, dtype=str).fillna('')
                     df_ventas.columns = [str(c).strip().lower() for c in df_ventas.columns]
                     
+                    # 1. PRE-PROCESAMIENTO: Averiguar de qué mes estamos hablando
+                    meses_en_excel = set()
+                    anios_en_excel = set()
+                    
+                    for _, row in df_ventas.iterrows():
+                        mes_txt = str(row.get('mes', '')).strip().lower()
+                        mes_n = MAPEO_MESES_EXCEL.get(mes_txt, 1)
+                        anio_val = str(row.get('año', '')).strip()
+                        anio_int = int(float(anio_val)) if anio_val else timezone.now().year
+                        
+                        meses_en_excel.add(mes_n)
+                        anios_en_excel.add(anio_int)
+                        
+                    # 2. LIMPIEZA: Borrar pedidos de Excel anteriores de esos meses para no duplicar
+                    if meses_en_excel and anios_en_excel:
+                        Pedido.objects.filter(
+                            origen_excel=True, 
+                            fecha_creacion__year__in=anios_en_excel,
+                            fecha_creacion__month__in=meses_en_excel
+                        ).delete()
+                    
+                    # 3. CARGA: Ingresar las ventas limpias
                     for _, row in df_ventas.iterrows():
                         rut = str(row.get('rut-3', '')).strip()
                         prod_nombre = str(row.get('producto', '')).strip()
@@ -529,14 +600,14 @@ def cargar_datos_excel(request):
                             except Exception:
                                 pass
                                 
-                            # Creamos SIEMPRE un pedido nuevo por cada fila del Excel
+                            # ¡AQUÍ ESTÁ LA MAGIA! Le ponemos origen_excel=True
                             pedido = Pedido.objects.create(
                                 institucion=inst, 
                                 representante=inst.representante, 
-                                estado='Facturado'
+                                estado='Facturado',
+                                origen_excel=True 
                             )
                             
-                            # Ajustamos la fecha según el Excel
                             fecha_falsa = timezone.make_aware(datetime(anio_int, mes_n, 15))
                             Pedido.objects.filter(id=pedido.id).update(fecha_creacion=fecha_falsa)
                             pedido.refresh_from_db()
@@ -557,7 +628,6 @@ def cargar_datos_excel(request):
     return render(request, 'ventas/cargar_metas.html')
 
 #FUNCION DETALLE DE INSTITUCIONES
-
 @login_required(login_url='usuarios:login')
 def detalle_institucion_view(request, institucion_id, mes, anio):
     institucion = get_object_or_404(Institucion, id=institucion_id)
@@ -664,8 +734,6 @@ def exportar_pedidos_excel(request):
     return response
 
 #EXPORTAR METAS
-
-
 def exportar_metas_excel(request):
     wb = Workbook()
     

@@ -50,7 +50,8 @@ class Pedido(models.Model):
 
     representante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pedidos')
     institucion = models.ForeignKey(Institucion, on_delete=models.PROTECT, related_name='pedidos')
-    
+    # Campo oculto para saber si esta venta la hizo el sistema leyendo un Excel
+    origen_excel = models.BooleanField(default=False)
     # =========================================================
     # ¡NUEVO CAMPO! Guardamos quién solicitó la orden
     # Usamos SET_NULL por si en el futuro borran al contacto, la orden no se borra.
@@ -173,3 +174,26 @@ class DetallePedido(models.Model):
         
         # 3. Le avisamos a la cabecera que actualice su total general
         self.pedido.calcular_totales()
+
+
+class MetaInstitucion(models.Model):
+    # Conectamos con la institución (Cliente)
+    institucion = models.ForeignKey('clientes.Institucion', on_delete=models.CASCADE, related_name='metas_mensuales')
+    # Conectamos con el vendedor responsable
+    representante = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # Fecha
+    mes = models.PositiveIntegerField(help_text="Número del mes (1-12)")
+    anio = models.PositiveIntegerField(help_text="Año (Ej: 2026)")
+    
+    # Dinero
+    monto_meta = models.DecimalField(max_digits=12, decimal_places=0, default=0)
+
+    class Meta:
+        # Evita que subas dos metas distintas para la misma clínica en el mismo mes
+        unique_together = ('institucion', 'representante', 'mes', 'anio')
+        verbose_name = 'Meta por Institución'
+        verbose_name_plural = 'Metas por Instituciones'
+
+    def __str__(self):
+        return f"{self.institucion.nombre} - {self.mes}/{self.anio} (${self.monto_meta})"

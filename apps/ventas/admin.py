@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pedido, DetallePedido, MetaMensual
+from .models import MetaInstitucion, Pedido, DetallePedido, MetaMensual
 
 # Esto permite ver los productos del carrito dentro de la misma pantalla del pedido
 
@@ -36,3 +36,14 @@ class MetaMensualAdmin(admin.ModelAdmin):
 class DetallePedidoAdmin(admin.ModelAdmin):
     list_display = ('pedido', 'producto', 'cantidad', 'precio_unitario_historico', 'subtotal')
     search_fields = ('pedido__institucion__nombre', 'producto__nombre')
+
+
+@admin.register(MetaInstitucion)
+class MetaInstitucionAdmin(admin.ModelAdmin):
+    list_display = ('institucion', 'representante', 'mes', 'anio', 'monto_meta_formateado')
+    list_filter = ('anio', 'mes', 'representante')
+    search_fields = ('institucion__nombre', 'institucion__rut', 'representante__username')
+
+    def monto_meta_formateado(self, obj):
+        return f"${obj.monto_meta:,}".replace(',', '.')
+    monto_meta_formateado.short_description = 'Monto Meta'

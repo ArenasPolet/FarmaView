@@ -50,11 +50,15 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="text-center">
+                               <td class="text-center">
                                     {% if u.es_gerente %}
-                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(255, 193, 7, 0.1); color: #856404; border: 1px solid rgba(255, 193, 7, 0.2);">Gerente</span>
+                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(255, 193, 7, 0.1); color: #856404; border: 1px solid rgba(255, 193, 7, 0.2);">
+                                            {{ u.rol }}
+                                        </span>
                                     {% else %}
-                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(13, 202, 240, 0.1); color: #087990; border: 1px solid rgba(13, 202, 240, 0.2);">Vendedor</span>
+                                        <span class="badge rounded-pill px-3 py-2" style="background: rgba(13, 202, 240, 0.1); color: #087990; border: 1px solid rgba(13, 202, 240, 0.2);">
+                                            {{ u.rol }}
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td class="text-center">

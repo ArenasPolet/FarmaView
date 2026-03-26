@@ -100,7 +100,6 @@ def toggle_estado_usuario(request, usuario_id):
     return redirect('usuarios:gestion_equipo')
 
 #EDITAR USUARIO
-
 @login_required(login_url='usuarios:login')
 def editar_usuario(request, usuario_id):
     # Verificamos permisos de Administrador

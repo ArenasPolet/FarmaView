@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+
+from apps.usuarios.models import UsuarioPersonalizado
 from .models import Visita 
+from itertools import chain
+from operator import attrgetter
 from .forms import VisitaForm
 # Importamos modelos para llenar los selectores
 from apps.clientes.models import Institucion, Contacto
@@ -335,39 +339,67 @@ def agendar_visita(request):
 def historial_view(request):
     query = request.GET.get('q', '')
     
-    # 1. LÓGICA DE PERMISOS (Jerarquía)
+    # --- 1. LÓGICA DE PERMISOS (Filtro Jerárquico) ---
+    # Usamos la misma lógica que en 'nueva_visita' y 'agendar_visita'
     if request.user.is_superuser:
-        vendedores_permitidos = Usuario.objects.all()
+        # IMPORTANTE: Asegúrate de usar el modelo de Usuario correcto aquí (ej: UsuarioPersonalizado)
+        vendedores_permitidos = UsuarioPersonalizado.objects.all() 
     elif getattr(request.user, 'es_gerente', False) or request.user.groups.filter(name='Gerente').exists():
-        vendedores_permitidos = Usuario.objects.filter(Q(id=request.user.id) | Q(jefe=request.user))
+        vendedores_permitidos = UsuarioPersonalizado.objects.filter(Q(id=request.user.id) | Q(jefe=request.user))
     else:
-        vendedores_permitidos = Usuario.objects.filter(id=request.user.id)
+        vendedores_permitidos = UsuarioPersonalizado.objects.filter(id=request.user.id)
     
-    # 2. Traemos todas las visitas de los vendedores permitidos
-    visitas_list = Visita.objects.filter(representante__in=vendedores_permitidos).order_by('-fecha_hora')
+    # --- 2. TRAEMOS DATOS DE AMBOS MODELOS ---
+    # Usamos select_related para optimizar las consultas a la base de datos
+    agendas = Visita.objects.filter(representante__in=vendedores_permitidos).select_related('institucion', 'contacto', 'representante')
+    registros = RegistroVisita.objects.filter(representante__in=vendedores_permitidos).select_related('institucion', 'contacto', 'representante')
     
-    # 3. Buscador inteligente
+    # --- 3. BUSCADOR INTELIGENTE UNIFICADO ---
     if query:
-        visitas_list = visitas_list.filter(
+        filtro_busqueda = (
             Q(institucion__nombre__icontains=query) |
             Q(contacto__nombre__icontains=query) |
             Q(tipo_gestion__icontains=query) |
-            Q(representante__first_name__icontains=query) | # ¡NUEVO! Permite buscar por nombre del vendedor
+            Q(representante__first_name__icontains=query) | 
             Q(representante__username__icontains=query)
         )
+        agendas = agendas.filter(filtro_busqueda)
+        registros = registros.filter(filtro_busqueda)
         
-    # 4. Paginación
-    paginator = Paginator(visitas_list, 10)
+    # --- 4. PREPARAR Y ESTANDARIZAR DATOS PARA EL HTML ---
+    # Convertimos los querysets a listas para poder modificarlos e inyectar atributos
+    lista_agendas = list(agendas)
+    for a in lista_agendas:
+        a.tipo_origen = 'Agendada' 
+        # El modelo 'Visita' ya debería tener un campo 'estado' (Pendiente, Realizada, Cancelada)
+        
+    lista_registros = list(registros)
+    for r in lista_registros:
+        r.tipo_origen = 'Directa'
+        # El modelo 'RegistroVisita' no suele tener campo de estado, así que se lo inventamos para el HTML
+        # Le ponemos 'Completada' para que tu HTML pinte el borde verde ( #10B981 ) y el badge verde claro
+        r.estado = 'Completada' 
+
+    # --- 5. UNIR Y ORDENAR ---
+    # Juntamos las dos listas y las ordenamos por 'fecha_hora' de más reciente a más antigua
+    # ASUNCIÓN: Ambos modelos (Visita y RegistroVisita) deben tener un campo llamado 'fecha_hora'.
+    historial_completo = sorted(
+        chain(lista_agendas, lista_registros),
+        key=attrgetter('fecha_hora'),
+        reverse=True
+    )
+        
+    # --- 6. PAGINACIÓN ---
+    paginator = Paginator(historial_completo, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     context = {
         'page_obj': page_obj,
         'query': query,
-        'total_registros': paginator.count,
+        'total_registros': len(historial_completo), # Total de ambas listas combinadas
     }
     return render(request, 'visitas/historial.html', context)
-
 
 # ==========================================
 # VISTA DE AGENDA (CON JERARQUÍA)

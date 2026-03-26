@@ -270,14 +270,15 @@ window.guardarInstitucionRapido = function(url, csrf) {
   
 
 // --- Dictado por voz (VERSIÓN ORIGINAL QUE FUNCIONA EN CELULAR) ---
+// --- Dictado por voz (VERSIÓN ORIGINAL CORREGIDA VISUALMENTE) ---
 window.miReconocimiento = null;
 window.estaGrabando = false;
 
 window.iniciarDictado = function() {
-    const btnDictar = document.querySelector('button[onclick="iniciarDictado()"]');
+    const btnDictar = document.getElementById('btn_dictar');
     const textarea = document.getElementById('notas_textarea');
     
-    // Si ya está grabando y tocamos el botón, lo apagamos y salimos
+    // Si ya está grabando y tocamos el botón, lo apagamos
     if (window.estaGrabando && window.miReconocimiento) {
         window.miReconocimiento.stop();
         return;
@@ -288,15 +289,17 @@ window.iniciarDictado = function() {
         window.miReconocimiento = new SpeechRecognition();
         
         window.miReconocimiento.lang = "es-CL"; 
-        window.miReconocimiento.continuous = true; // El que te funcionó en el celular
+        window.miReconocimiento.continuous = true; 
         window.miReconocimiento.interimResults = true; 
         
         let textoGuardado = textarea.value; 
 
         window.miReconocimiento.onstart = function() {
             window.estaGrabando = true;
-            btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-2 text-danger"></i> DETENER';
-            btnDictar.style.color = "#dc3545"; 
+            // CAMBIO VISUAL: Fondo rojo sólido para que se note mucho
+            btnDictar.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i> DETENER';
+            btnDictar.style.backgroundColor = "#dc3545"; // Rojo intenso
+            btnDictar.style.color = "white";
         };
 
         window.miReconocimiento.onresult = function(event) { 
@@ -313,8 +316,10 @@ window.iniciarDictado = function() {
 
         window.miReconocimiento.onend = function() {
             window.estaGrabando = false;
+            // VOLVER AL AZUL: Restauramos el color profesional
             btnDictar.innerHTML = '<i class="bi bi-mic-fill me-2"></i>DICTAR NOTA';
-            btnDictar.style.color = ""; 
+            btnDictar.style.backgroundColor = "#2b3a67"; // Tu azul oscuro
+            btnDictar.style.color = "white";
         };
 
         window.miReconocimiento.start();

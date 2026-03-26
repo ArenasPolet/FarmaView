@@ -228,8 +228,11 @@
                             <i class="bi bi-chat-left-dots section-icon icon-obs"></i>{% translate "Observaciones" %}
                         </label>
                         <div class="position-relative">
-                            <textarea name="notas" id="notas_textarea" class="form-control border-0 bg-light p-3" rows="4" style="border-radius: 15px; padding-bottom: 60px;" placeholder="{% translate 'Escriba detalles sobre la visita...' %}"></textarea>
-                           <button type="button" onclick="iniciarDictado()" class="btn btn-light shadow-sm btn-sm position-absolute bottom-0 end-0 m-3 rounded-pill px-3 border" style="background-color: #edf2ff; color: #2b3a67;">
+                            <textarea name="notas" id="notas_textarea" class="form-control border-0 bg-light p-3" rows="4" style="border-radius: 15px; padding-bottom: 60px;" placeholder="Escriba detalles sobre la visita..."></textarea>
+                            
+                            <button type="button" id="btn_dictar" onclick="iniciarDictado()" 
+                                    class="btn shadow-lg position-absolute bottom-0 end-0 m-3 rounded-pill px-4 py-2 border-0" 
+                                    style="background-color: #2b3a67; color: white; z-index: 10;">
                                 <i class="bi bi-mic-fill me-2"></i>DICTAR NOTA
                             </button>
                         </div>

@@ -176,6 +176,26 @@
                                 {% translate visita.tipo_gestion|default:"No especificado" %}
                             </span>
 
+                            {% if visita.tipo_origen == 'Agendada' %}
+                                <span class="badge rounded-pill px-3 py-2 fw-bold" style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 0.75rem;">
+                                    <i class="bi bi-calendar-check me-1"></i> {% translate "Agendada" %}
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill px-3 py-2 fw-bold" style="background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; font-size: 0.75rem;">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> {% translate "En Terreno" %}
+                                </span>
+                            {% endif %}
+
+                            <!--gps-->
+
+                            {% if request.user.is_superuser or request.user.es_gerente %}
+                                {% if visita.tipo_origen == 'Directa' and visita.latitud and visita.longitud %}
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ visita.latitud }},{{ visita.longitud }}" target="_blank" class="badge rounded-pill px-3 py-2 fw-bold text-decoration-none shadow-sm transition-hover" style="background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; font-size: 0.75rem;">
+                                        <i class="bi bi-geo-alt-fill me-1"></i> {% translate "Ver Mapa" %}
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+
                             <div class="d-flex flex-column align-items-center align-items-lg-end">
                                 {% if visita.estado == 'Realizada' or visita.estado == 'Completada' %}
                                     <span class="badge rounded-pill px-3 py-1 badge-custom" style="background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;">{% translate "Completada" %}</span>

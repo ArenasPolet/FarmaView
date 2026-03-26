@@ -48,6 +48,9 @@
             <div class="card-body">
                 <form method="POST" id="mainVisitaForm" action="{% url 'visitas:nueva_visita' %}">
                     {% csrf_token %}
+                    <!--GPS-->
+                    <input type="hidden" name="latitud" id="gps_latitud">
+                    <input type="hidden" name="longitud" id="gps_longitud">
                     
                     <div class="mb-4">
                         <label class="form-label section-title mb-2 text-uppercase">
@@ -306,6 +309,22 @@
 
 {% block extra_js %}
 <script src="{% static 'js/visitas.js' %}"></script>
-
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Si el GPS funciona, guardamos las coordenadas
+                    document.getElementById('gps_latitud').value = position.coords.latitude;
+                    document.getElementById('gps_longitud').value = position.coords.longitude;
+                },
+                function(error) {
+                    console.log("No se pudo obtener el GPS o el usuario denegó el permiso.");
+                },
+                { enableHighAccuracy: true } // Fuerza a usar el GPS real del celular
+            );
+        }
+    });
+</script>
 {% endblock %}
 {% endblock %}

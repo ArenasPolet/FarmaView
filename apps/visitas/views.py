@@ -222,6 +222,9 @@ def nueva_visita_view(request):
         contacto_id = request.POST.get('contacto')
         tipo_gestion = request.POST.get('tipo_gestion', 'Presentación')
         notas = request.POST.get('notas')
+        # Atrapamos las coordenadas ocultas
+        lat_recibida = request.POST.get('latitud')
+        lon_recibida = request.POST.get('longitud')
 
         if not institucion_id:
             messages.error(request, 'Debe seleccionar una institución.')
@@ -234,7 +237,9 @@ def nueva_visita_view(request):
                 institucion_id=institucion_id,
                 contacto_id=contacto_id if contacto_id else None,
                 tipo_gestion=tipo_gestion,
-                notas=notas
+                notas=notas,
+                latitud=lat_recibida,  
+                longitud=lon_recibida
                 # Recordatorio: fecha_hora se pone sola por el auto_now_add=True
             )
             nuevo_registro.save()

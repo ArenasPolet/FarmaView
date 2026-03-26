@@ -41,10 +41,15 @@ class RegistroVisita(models.Model):
     productos = models.ManyToManyField(Producto, blank=True, related_name='registros_visitas')
     notas = models.TextField(blank=True, null=True)
     tipo_gestion = models.CharField(max_length=50, blank=True, null=True, verbose_name="Tipo de Gestión")
-    
+    # --- CAMPOS GPS ---
+    latitud = models.CharField(max_length=50, null=True, blank=True)
+    longitud = models.CharField(max_length=50, null=True, blank=True)
     class Meta:
         verbose_name = "Registro de Visita"
         verbose_name_plural = "Registros de Visitas"
 
     def __str__(self):
         return f"Registro en {self.institucion.nombre} - {self.fecha_hora.strftime('%d/%m/%Y %H:%M')}"
+    
+
+

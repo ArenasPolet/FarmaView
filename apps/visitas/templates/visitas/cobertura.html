@@ -111,108 +111,166 @@
                     <h5 class="fw-bold text-dark mb-0 fs-6 fs-md-5">{% translate "Detalle del Territorio" %}</h5>
                 </div>
                 
-                <div class="table-responsive border-top">
-                    <table class="table table-hover align-middle mb-0 text-nowrap">
-                        <thead class="bg-light" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
-                            <tr>
-                                {% if request.user.is_superuser or request.user.es_gerente %}
-                                    <th class="text-center py-3">{% translate "Representante" %}</th>
-                                {% endif %}
-                                <th class="border-0 text-muted fw-bold ps-3 ps-md-4 py-3">{% translate "Nombre Institución" %}</th>
-                                <th class="border-0 text-muted fw-bold py-3">{% translate "Tipo" %}</th>
-                                <th class="border-0 text-muted fw-bold pe-3 pe-md-4 py-3 text-end">{% translate "Estado Mes Actual" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="border-top-0">
-                            {% for sitio in lista_territorio %}
-                            <tr>
-                                {% if request.user.is_superuser or request.user.es_gerente %}
-                                    <td class="text-center">
-                                        <span class="badge bg-light text-dark border px-2 py-1">
-                                            <i class="bi bi-person-badge text-primary me-1"></i>
-                                            {{ sitio.representante.get_full_name|default:sitio.representante.username }}
-                                        </span>
-                                    </td>
-                                {% endif %}
-                                <td class="ps-3 ps-md-4 py-3">
-                                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ sitio.nombre|title }}</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">ID: {{ sitio.rut }}</div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="text-secondary fw-medium" style="font-size: 0.8rem;">{% translate sitio.tipo|default:"Centro Médico" %}</span>
-                                </td>
-                                <td class="pe-3 pe-md-4 py-3">
-                                    {% if sitio.conteo_visitas >= 2 %}
-                                        <div class="d-flex align-items-center justify-content-end gap-2 text-success">
-                                            <i class="bi bi-check-all fs-5"></i>
-                                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "Completado" %} ({{ sitio.conteo_visitas }}/2)</span>
-                                        </div>
-                                    {% elif sitio.conteo_visitas == 1 %}
-                                        <div class="d-flex align-items-center justify-content-end gap-2 text-primary">
-                                            <i class="bi bi-arrow-repeat fs-5"></i>
-                                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "En Progreso" %} (1/2)</span>
-                                        </div>
-                                    {% else %}
-                                        <div class="d-flex align-items-center justify-content-end gap-2 text-warning">
-                                            <i class="bi bi-exclamation-circle-fill"></i>
-                                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "Pendiente" %} (0/2)</span>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="100%" class="text-center py-5 text-muted small">{% translate "No hay cuentas registradas en tu territorio." %}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <nav aria-label="Navegación de páginas" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            
-                            {# Botón Anterior #}
-                            {% if lista_territorio.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ lista_territorio.previous_page_number }}" aria-label="Anterior">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-                            {% endif %}
-
-                            {# Números de Página #}
-                            {% for num in lista_territorio.paginator.page_range %}
-                                {% if lista_territorio.number == num %}
-                                    <li class="page-item active" aria-current="page">
-                                        <span class="page-link" style="background-color: #1784C7; border-color: #1784C7;">{{ num }}</span>
-                                    </li>
-                                {% elif num > lista_territorio.number|add:'-3' and num < lista_territorio.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-
-                            {# Botón Siguiente #}
-                            {% if lista_territorio.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ lista_territorio.next_page_number }}" aria-label="Siguiente">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-                            {% endif %}
-
-                        </ul>
-                        <div class="text-center mt-2">
-                            <small class="text-muted">
-                                {% translate "Mostrando página" %} {{ lista_territorio.number }} {% translate "de" %} {{ lista_territorio.paginator.num_pages }}
-                            </small>
+                <div class="table-responsive border-top d-none d-md-block">
+    <table class="table table-hover align-middle mb-0 text-nowrap">
+        <thead class="bg-light" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
+            <tr>
+                {% if request.user.is_superuser or request.user.es_gerente %}
+                    <th class="text-center py-3">{% translate "Representante" %}</th>
+                {% endif %}
+                <th class="border-0 text-muted fw-bold ps-3 ps-md-4 py-3">{% translate "Nombre Institución" %}</th>
+                <th class="border-0 text-muted fw-bold py-3">{% translate "Tipo" %}</th>
+                <th class="border-0 text-muted fw-bold pe-3 pe-md-4 py-3 text-end">{% translate "Estado Mes Actual" %}</th>
+            </tr>
+        </thead>
+        <tbody class="border-top-0">
+            {% for sitio in lista_territorio %}
+            <tr>
+                {% if request.user.is_superuser or request.user.es_gerente %}
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark border px-2 py-1">
+                            <i class="bi bi-person-badge text-primary me-1"></i>
+                            {{ sitio.representante.get_full_name|default:sitio.representante.username }}
+                        </span>
+                    </td>
+                {% endif %}
+                <td class="ps-3 ps-md-4 py-3">
+                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ sitio.nombre|title }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">ID: {{ sitio.rut }}</div>
+                </td>
+                <td class="py-3">
+                    <span class="text-secondary fw-medium" style="font-size: 0.8rem;">{% translate sitio.tipo|default:"Centro Médico" %}</span>
+                </td>
+                <td class="pe-3 pe-md-4 py-3">
+                    {% if sitio.conteo_visitas >= 2 %}
+                        <div class="d-flex align-items-center justify-content-end gap-2 text-success">
+                            <i class="bi bi-check-all fs-5"></i>
+                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "Completado" %} ({{ sitio.conteo_visitas }}/2)</span>
                         </div>
-                    </nav>
-                </div> 
+                    {% elif sitio.conteo_visitas == 1 %}
+                        <div class="d-flex align-items-center justify-content-end gap-2 text-primary">
+                            <i class="bi bi-arrow-repeat fs-5"></i>
+                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "En Progreso" %} (1/2)</span>
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-end gap-2 text-warning">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <span class="fw-bold" style="font-size: 0.8rem;">{% translate "Pendiente" %} (0/2)</span>
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="100%" class="text-center py-5 text-muted small">{% translate "No hay cuentas registradas en tu territorio." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-block d-md-none border-top pt-3 bg-light px-2 pb-3">
+    <div class="row g-3 m-0">
+        {% for sitio in lista_territorio %}
+        <div class="col-12 px-0">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 transition-card-hover">
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-primary fw-bold shadow-inner" style="width: 42px; height: 42px; border: 1px solid #e2e8f0; font-size: 1.1rem;">
+                        {{ sitio.nombre|slice:":2"|upper }}
+                    </div>
+                    
+                    <div>
+                        {% if sitio.conteo_visitas >= 2 %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 shadow-sm">
+                                <i class="bi bi-check-all"></i> {% translate "Completado" %} ({{ sitio.conteo_visitas }}/2)
+                            </span>
+                        {% elif sitio.conteo_visitas == 1 %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 shadow-sm">
+                                <i class="bi bi-arrow-repeat"></i> {% translate "En Progreso" %} (1/2)
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2 py-1 shadow-sm">
+                                <i class="bi bi-exclamation-circle-fill"></i> {% translate "Pendiente" %} (0/2)
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <h6 class="fw-bold text-dark mb-0 fs-6">{{ sitio.nombre|title }}</h6>
+                    <span class="text-muted small" style="font-size: 0.75rem;">ID: {{ sitio.rut }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 mt-2" style="border-top: 1px solid #f1f5f9;">
+                    <span class="text-secondary small fw-medium">
+                        <i class="bi bi-building me-1 text-muted"></i> {% translate sitio.tipo|default:"Centro Médico" %}
+                    </span>
+                    
+                    {% if request.user.is_superuser or request.user.es_gerente %}
+                    <span class="text-secondary small fw-bold text-end">
+                        <i class="bi bi-person-badge me-1 text-primary"></i> 
+                        {{ sitio.representante.first_name|default:sitio.representante.username }}
+                    </span>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-4 text-muted small">
+            <i class="bi bi-geo-alt fs-2 d-block mb-2 opacity-50"></i>
+            {% translate "No hay cuentas registradas en tu territorio." %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<nav aria-label="Navegación de páginas" class="mt-4 pb-4">
+    <ul class="pagination justify-content-center mb-1">
+        
+        {# Botón Anterior #}
+        {% if lista_territorio.has_previous %}
+            <li class="page-item">
+                <a class="page-link shadow-sm" href="?page={{ lista_territorio.previous_page_number }}" aria-label="Anterior" style="border-radius: 8px 0 0 8px;">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link" style="border-radius: 8px 0 0 8px;">&laquo;</span></li>
+        {% endif %}
+
+        {# Números de Página #}
+        {% for num in lista_territorio.paginator.page_range %}
+            {% if lista_territorio.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link shadow-sm" style="background-color: #1784C7; border-color: #1784C7;">{{ num }}</span>
+                </li>
+            {% elif num > lista_territorio.number|add:'-3' and num < lista_territorio.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link shadow-sm" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Botón Siguiente #}
+        {% if lista_territorio.has_next %}
+            <li class="page-item">
+                <a class="page-link shadow-sm" href="?page={{ lista_territorio.next_page_number }}" aria-label="Siguiente" style="border-radius: 0 8px 8px 0;">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link" style="border-radius: 0 8px 8px 0;">&raquo;</span></li>
+        {% endif %}
+
+    </ul>
+    <div class="text-center mt-2">
+        <small class="text-muted fw-medium">
+            {% translate "Mostrando página" %} {{ lista_territorio.number }} {% translate "de" %} {{ lista_territorio.paginator.num_pages }}
+        </small>
+    </div>
+</nav>
             </div>
     </div>
 </div>

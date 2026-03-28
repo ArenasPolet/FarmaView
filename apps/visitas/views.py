@@ -19,7 +19,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect
 import calendar
 from django.http import JsonResponse
-from apps.ventas.models import MetaMensual,Pedido
+from apps.ventas.models import MetaInstitucion, MetaMensual,Pedido
 from django.contrib.auth import get_user_model
 
 Usuario = get_user_model()
@@ -58,20 +58,17 @@ def dashboard_view(request):
         mis_visitas = Visita.objects.filter(
             representante__in=vendedores_permitidos, 
             fecha_hora__date=hoy_real
-        ).order_by('fecha_hora')[:5] # Aumenté a 5 para que el gerente vea un poco más
-    # 3. NUEVO: ATENCIÓN REQUERIDA (Visitas Pendientes Atrasadas)
-    # Filtramos por equipo, estado Pendiente y que la fecha ya haya pasado
+        ).order_by('fecha_hora')[:5]
+
+    # 3. ATENCIÓN REQUERIDA (Visitas Pendientes Atrasadas)
     ultimas_pendientes = Visita.objects.filter(
         representante__in=vendedores_permitidos,
         estado__icontains='Pendiente',
-        fecha_hora__lt=ahora_full  # lte = menor que ahora (atrasadas)
+        fecha_hora__lt=ahora_full
     ).select_related('institucion', 'representante').order_by('fecha_hora')[:5]
 
-    # Print para debug en consola (revisa tu terminal al cargar la página)
-    print(f"DEBUG DASHBOARD: Pendientes encontradas para el equipo: {ultimas_pendientes.count()}")
-   
-    # 3. Metas y Ventas (ESTRICTO al mes seleccionado y equipo permitido)
-    meta_monto = MetaMensual.objects.filter(
+    # 4. METAS Y VENTAS (¡Aquí está el cambio principal a MetaInstitucion!)
+    meta_monto = MetaInstitucion.objects.filter(
         representante__in=vendedores_permitidos, 
         mes=mes_sel, 
         anio=anio_sel
@@ -86,7 +83,13 @@ def dashboard_view(request):
 
     porcentaje = int((ventas_totales / meta_monto) * 100) if meta_monto > 0 else 0
 
-    # 4. Proyección (Calculada sobre el total de ventas del equipo)
+    # Obtenemos la última venta real para el footer de la tarjeta
+    ultima_venta = Pedido.objects.filter(
+        representante__in=vendedores_permitidos,
+        estado__in=['Ingresado', 'Facturado']
+    ).order_by('-fecha_creacion').first()
+
+    # 5. Proyección 
     proyeccion = ventas_totales
     if mes_sel == hoy_real.month and anio_sel == hoy_real.year:
         dias_pasados = hoy_real.day
@@ -95,23 +98,26 @@ def dashboard_view(request):
             proyeccion = int((ventas_totales / dias_pasados) * dias_totales)
 
     # ==========================================
-    #  CÁLCULO DE COBERTURA PARA DASHBOARD
+    #  CÁLCULO DE COBERTURA EXACTO (Agendas + Terreno)
     # ==========================================
-    # 1. Obtenemos las clínicas del equipo
     instituciones_equipo = Institucion.objects.filter(representante__in=vendedores_permitidos).distinct()
-    
-    # 2. La meta son 2 visitas por cada clínica
     meta_cobertura_dashboard = instituciones_equipo.count() * 2 
     
-    # 3. Contamos cuántas visitas "Realizadas" llevan este mes
-    visitas_realizadas_dashboard = Visita.objects.filter(
+    # Sumamos tanto las agendas realizadas como los registros directos en terreno
+    visitas_agendadas = Visita.objects.filter(
         representante__in=vendedores_permitidos,
-        estado='Realizada',
+        estado__in=['Realizada', 'Completada'],
         fecha_hora__year=anio_sel,
         fecha_hora__month=mes_sel
     ).count()
 
-    # 4. Calculamos el porcentaje
+    visitas_terreno = RegistroVisita.objects.filter(
+        representante__in=vendedores_permitidos,
+        fecha_hora__year=anio_sel,
+        fecha_hora__month=mes_sel
+    ).count()
+
+    visitas_realizadas_dashboard = visitas_agendadas + visitas_terreno
     porcentaje_cobertura_dashboard = int((visitas_realizadas_dashboard / meta_cobertura_dashboard) * 100) if meta_cobertura_dashboard > 0 else 0
 
     # ==========================================
@@ -131,10 +137,10 @@ def dashboard_view(request):
         'hoy': hoy_real,
         'meta_cobertura': meta_cobertura_dashboard,
         'visitas_realizadas': visitas_realizadas_dashboard,
-        'porcentaje_cobertura': porcentaje_cobertura_dashboard,
+        'porcentaje_cobertura': min(porcentaje_cobertura_dashboard, 100),
+        'ultima_venta': ultima_venta, # Enviamos el dato al HTML
     }
     return render(request, 'visitas/dashboard.html', contexto)
-
 
 # ==========================================
 # VISTA COBERTURA (CON JERARQUÍA)

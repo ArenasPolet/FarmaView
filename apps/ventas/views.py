@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
-
+from django.core.paginator import Paginator
 from apps.visitas.models import RegistroVisita, Visita
 from .models import MetaInstitucion, MetaMensual
 from apps.clientes.models import Institucion
@@ -118,7 +118,21 @@ def metas_view(request):
         data['cantidad_visitas'] = agendas + terreno
         data['cumplimiento'] = int((data['total_vendido'] / data['monto_meta']) * 100) if data['monto_meta'] > 0 else (100 if data['total_vendido'] > 0 else 0)
 
-    ventas_por_institucion = sorted(datos_instituciones.values(), key=lambda x: x['total_vendido'], reverse=True)
+   # --- NUEVO: LÓGICA DE FILTRADO ---
+    filtro_visitas = request.GET.get('filtro_visitas', 'todas')
+    
+    lista_filtrada = []
+    for data in datos_instituciones.values():
+        if filtro_visitas == 'visitadas' and data['cantidad_visitas'] == 0:
+            continue # Si pide visitadas y tiene 0, la saltamos
+        if filtro_visitas == 'no_visitadas' and data['cantidad_visitas'] > 0:
+            continue # Si pide no visitadas y tiene más de 0, la saltamos
+            
+        lista_filtrada.append(data) # Si pasa el filtro, la guardamos
+
+    # Ahora ordenamos solo la lista que ya pasó por el filtro
+    ventas_por_institucion = sorted(lista_filtrada, key=lambda x: x['total_vendido'], reverse=True)
+    # ---------------------------------
 
     # 4. MATEMÁTICAS SUPERIORES
     porcentaje = int((ventas_actuales / meta_total_mes) * 100) if meta_total_mes > 0 else 0
@@ -130,6 +144,13 @@ def metas_view(request):
     # NUEVO CÁLCULO: Ticket Promedio
     ticket_promedio = int(ventas_actuales / cantidad_pedidos_totales) if cantidad_pedidos_totales > 0 else 0
 
+    # --- NUEVO: PAGINACIÓN ---
+    # Cortamos la lista en grupos de 10 (puedes cambiar este número al que prefieras)
+    paginator = Paginator(ventas_por_institucion, 10) 
+    page_number = request.GET.get('page')
+    ventas_paginadas = paginator.get_page(page_number)
+    # -------------------------
+
     contexto = {
         'mes_sel': mes_sel,
         'anio_sel': anio_sel,
@@ -137,14 +158,15 @@ def metas_view(request):
         'nombres_meses': NOMBRES_MESES,
         'ventas_actuales': ventas_actuales,
         'meta_mensual': meta_total_mes,
+        'ventas_por_institucion': ventas_paginadas,
         'porcentaje_avance': min(porcentaje, 100),
         'brecha': brecha,
         'ritmo_requerido': ritmo,
         'dias_restantes': dias_restantes,
-        'ticket_promedio': ticket_promedio, # <--- ENVIAMOS ESTO
+        'ticket_promedio': ticket_promedio, 
         'cantidad_pedidos': cantidad_pedidos_totales,
-        'ventas_por_institucion': ventas_por_institucion, 
-        'pedidos': ventas_base
+        'pedidos': ventas_base,
+        'filtro_visitas': filtro_visitas,
     }
     
     return render(request, 'ventas/metas.html', contexto)

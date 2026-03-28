@@ -68,11 +68,28 @@
                             <a href="#" class="fw-bold text-decoration-none" style="font-size: 13px; color: #0047AB;">{% translate "¿Olvidaste tu contraseña?" %}</a>
                         </div>
 
+                        
+
                         <button type="submit" class="btn btn-login w-100 py-3 d-flex justify-content-center align-items-center gap-2 fw-bold shadow-sm" style="font-size: 1.1rem; border-radius: 12px;">
                             {% translate "Iniciar Sesión" %}
                             <i class="bi bi-arrow-right"></i>
                         </button>
                     </form>
+
+                    {% load socialaccount %}
+
+<div class="mt-4">
+    <div class="position-relative mb-4">
+        <hr class="text-muted">
+        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">o también</span>
+    </div>
+
+    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark w-100 rounded-pill fw-bold d-flex align-items-center justify-content-center py-2 transition-hover shadow-sm">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 18px; margin-right: 12px;">
+        {% translate "Iniciar sesión con Google" %}
+    </a>
+</div>
+                    
 
                     <div class="mt-5 pt-3 border-top border-light text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-3" style="font-size: 10px; letter-spacing: 1px;">

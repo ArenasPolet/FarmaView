@@ -25,8 +25,13 @@ SECRET_KEY = 'django-insecure-(!o%_+4au%5p7=nl))3%go^1n(5z3^!fk6%lut+a8ns)z@!r*&
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# Permitir que tu servidor funcione en ese dominio
+ALLOWED_HOSTS = ['polet.pythonanywhere.com', 'localhost', '127.0.0.1']
 
-ALLOWED_HOSTS = ['*']
+# ¡SUPER IMPORTANTE PARA EL LOGIN! 
+# Django necesita confiar en las respuestas que vienen desde Google hacia tu dominio
+CSRF_TRUSTED_ORIGINS = ['https://polet.pythonanywhere.com']
+
 
 
 # Application definition
@@ -45,10 +50,24 @@ INSTALLED_APPS = [
     'apps.visitas.apps.VisitasConfig',
     'apps.productos.apps.ProductosConfig',
     'apps.ventas.apps.VentasConfig',
+    # Apps necesarias para allauth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    
+    # Los proveedores que queremos usar
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.microsoft',
 
 ]
 
+# allauth necesita un ID de sitio
+SITE_ID = 1
+
 MIDDLEWARE = [
+    #allauth
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -154,6 +173,27 @@ AUTH_USER_MODEL = 'usuarios.UsuarioPersonalizado'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+AUTHENTICATION_BACKENDS = [
+    # Para poder seguir iniciando sesión normal (correo/rut y contraseña)
+    'django.contrib.auth.backends.ModelBackend',
+    # Para la autenticación con Google y Microsoft
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Configuración de comportamiento
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+LOGIN_REDIRECT_URL = 'visitas:dashboard' # O la ruta a donde quieres que vayan al entrar
+
+# Esto hace que al hacer clic en el botón, vaya directo a Google sin preguntar "Continuar"
+SOCIALACCOUNT_LOGIN_ON_GET = True
+# Conecta automáticamente la cuenta de Google con el usuario de Django si el email coincide
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
 
 
 #CIERRE SESION

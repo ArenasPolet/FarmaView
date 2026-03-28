@@ -33,6 +33,9 @@ urlpatterns = [
     path('productos/', include('apps.productos.urls')), # <--- AGREGAMOS PRODUCTOS
     path('ventas/', include('apps.ventas.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
+
+    # Rutas para inicio de sesión social
+    path('accounts/', include('allauth.urls')),
 ]
 
 # ESTO ES VITAL: Permite que Django sirva las fotos de los productos en desarrollo

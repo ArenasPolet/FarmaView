@@ -415,6 +415,11 @@ def historial_view(request):
 # ==========================================
 # VISTA DE AGENDA (CON JERARQUÍA)
 # ==========================================
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Q
+# Asegúrate de importar tu modelo Visita y Usuario
+
 @login_required(login_url='usuarios:login')
 def mi_agenda_view(request):
     fecha_str = request.GET.get('fecha')
@@ -442,15 +447,58 @@ def mi_agenda_view(request):
     else:
         vendedores_permitidos = Usuario.objects.filter(id=request.user.id)
 
-    # 2. Filtrar visitas del día solo para el equipo permitido
-    visitas_dia = Visita.objects.filter(
+    # --- 2. MAGIA DE FUSIÓN (TIMELINE DIARIO) ---
+    # A) Buscamos las visitas programadas
+    visitas_agendadas = Visita.objects.filter(
         representante__in=vendedores_permitidos,
         fecha_hora__date=fecha_seleccionada
-    ).order_by('fecha_hora')
+    )
+
+    # B) Buscamos las visitas espontáneas (Nueva Visita)
+    visitas_espontaneas = RegistroVisita.objects.filter(
+        representante__in=vendedores_permitidos,
+        fecha_hora__date=fecha_seleccionada
+    )
+    
+    # Truco de ingeniera: Como RegistroVisita no tiene campo "estado" por defecto, 
+    # le inyectamos uno temporalmente para que tu HTML lo pinte verde (Realizada)
+    for visita in visitas_espontaneas:
+        visita.estado = 'Realizada'
+
+    # Juntamos ambas listas y las ordenamos por hora
+    visitas_dia = sorted(
+        chain(visitas_agendadas, visitas_espontaneas),
+        key=attrgetter('fecha_hora')
+    )
+
+   # --- 3. TABLA INFERIOR (PANEL GENERAL DE ACTIVIDAD) ---
+    
+    # A) Traemos las visitas agendadas (sin importar la fecha, solo las que no estén canceladas)
+    lista_agendadas = Visita.objects.filter(
+        representante__in=vendedores_permitidos
+    ).exclude(estado='Cancelada')
+
+    # B) Traemos todas las visitas espontáneas (RegistroVisita)
+    lista_espontaneas = RegistroVisita.objects.filter(
+        representante__in=vendedores_permitidos
+    )
+    
+    # Inyectamos el estado para el diseño
+    for v in lista_espontaneas:
+        v.estado = 'Realizada'
+
+    # C) Fusión y Orden: Queremos que lo más RECIENTE aparezca primero
+    # Ordenamos por fecha_hora de forma descendente (el signo '-' antes de la fecha)
+    proximas_visitas = sorted(
+        chain(lista_agendadas, lista_espontaneas),
+        key=attrgetter('fecha_hora'),
+        reverse=True # <--- Esto pone lo más nuevo arriba
+    )[:20] # Mostramos los últimos 30 movimientos
 
     contexto = {
         'fecha_actual': fecha_seleccionada,
-        'visitas': visitas_dia,
+        'visitas': visitas_dia, 
+        'proximas_visitas': proximas_visitas,
         'dias_semana': dias_semana, 
         'semana_anterior': semana_anterior,  
         'semana_siguiente': semana_siguiente, 

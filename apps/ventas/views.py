@@ -47,7 +47,13 @@ Usuario = get_user_model()
 #DE METAS
 @login_required(login_url='usuarios:login')
 def metas_view(request):
-    hoy_real = timezone.now().date()
+    # 1. Sacamos la hora exacta de Chile
+    ahora_local = timezone.localtime(timezone.now())
+    
+    # 2. Extraemos la fecha real basándonos en esa hora local
+    hoy_real = ahora_local.date()
+    
+    # 3. Ahora sí, el mes y el año por defecto serán 100% precisos
     mes_sel = int(request.GET.get('mes', hoy_real.month))
     anio_sel = int(request.GET.get('anio', hoy_real.year))
 

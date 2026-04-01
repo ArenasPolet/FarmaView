@@ -37,8 +37,8 @@ NOMBRES_MESES = {
 # ==========================================
 @login_required(login_url='usuarios:login')
 def dashboard_view(request):
-    hoy_real = timezone.now().date()
-    ahora_full = timezone.now()
+    ahora_full =timezone.localtime(timezone.now())
+    hoy_real = ahora_full.date()
     
     # --- LÓGICA DEL FILTRO ---
     mes_sel = int(request.GET.get('mes', hoy_real.month))
@@ -145,9 +145,19 @@ def dashboard_view(request):
 # ==========================================
 # VISTA COBERTURA (CON JERARQUÍA)
 # ==========================================
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+# Asegúrate de tener tus modelos importados: Institucion, Visita, RegistroVisita, Usuario
+
+# ==========================================
+# VISTA COBERTURA (CON JERARQUÍA)
+# ==========================================
 @login_required
 def cobertura_view(request):
-    hoy = timezone.now()
+    # 1. Sacamos la hora UTC y la convertimos OBLIGATORIAMENTE a la hora de Chile
+    hoy = timezone.localtime(timezone.now())
     inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     
     # 1. Definir el equipo permitido (Jerarquía)
@@ -163,50 +173,68 @@ def cobertura_view(request):
         representante__in=vendedores_permitidos
     ).distinct()
 
-    # 3. Calcular métricas generales (Totales)
-    meta_total_visitas = instituciones_del_equipo.count() * 2
-    
-    visitas_reales = Visita.objects.filter(
+    # --- 3. MÉTRICAS GENERALES (FUSIONADAS) ---
+    # Contamos realizadas en Visita
+    v_reales = Visita.objects.filter(
         representante__in=vendedores_permitidos,
         estado='Realizada',
         fecha_hora__gte=inicio_mes
-    )
+    ).count()
+
+    # Contamos realizadas en RegistroVisita
+    r_reales = RegistroVisita.objects.filter(
+        representante__in=vendedores_permitidos,
+        fecha_hora__gte=inicio_mes
+    ).count()
     
-    total_visitas_realizadas = visitas_reales.count()
+    total_visitas_realizadas = v_reales + r_reales
+    meta_total_visitas = instituciones_del_equipo.count() * 2
     pendientes_totales = max(0, meta_total_visitas - total_visitas_realizadas)
     porcentaje = int((total_visitas_realizadas / meta_total_visitas * 100)) if meta_total_visitas > 0 else 0
 
-    # 4. Crear el QuerySet con el conteo (con el arreglo de F('representante') para evitar cruces)
-    # IMPORTANTE: Definimos la variable FUERA de cualquier IF para que siempre exista
-    queryset_con_conteo = instituciones_del_equipo.annotate(
-        conteo_visitas=Count(
-            'visitas_programadas',
-            filter=Q(
-                visitas_programadas__fecha_hora__gte=inicio_mes,
-                visitas_programadas__estado='Realizada',
-                visitas_programadas__representante=F('representante') # Asegura que el dueño hizo la visita
-            )
-        )
-    ).order_by('conteo_visitas', 'nombre')
+   # --- 4. OBTENER, CONTAR Y ORDENAR ---
+    # Convertimos el queryset a una lista de Python para poder manipularla libremente
+    todas_las_instituciones = list(instituciones_del_equipo)
 
-    # 5. Paginación (Aquí es donde se definirá 'lista_territorio' sí o sí)
-    paginator = Paginator(queryset_con_conteo, 10)
+    # Contamos las visitas para TODAS las instituciones primero
+    for inst in todas_las_instituciones:
+        agendadas = Visita.objects.filter(
+            institucion=inst,
+            representante__in=vendedores_permitidos,
+            estado='Realizada',
+            fecha_hora__gte=inicio_mes
+        ).count()
+
+        espontaneas = RegistroVisita.objects.filter(
+            institucion=inst,
+            representante__in=vendedores_permitidos,
+            fecha_hora__gte=inicio_mes
+        ).count()
+
+        inst.conteo_visitas = agendadas + espontaneas
+
+    # LA MAGIA DEL ORDENAMIENTO UX:
+    # Ordenamos la lista. Primero por 'conteo_visitas' (los 0 van arriba, luego los 1, luego los 2+)
+    # y en caso de empate (por ejemplo, muchos con 0), los ordena alfabéticamente por 'nombre'
+    todas_las_instituciones.sort(key=lambda x: (x.conteo_visitas, x.nombre))
+
+    # --- 5. PAGINACIÓN ---
+    # El Paginator de Django es tan genial que funciona perfecto con listas de Python
+    paginator = Paginator(todas_las_instituciones, 10)
     page_number = request.GET.get('page')
-    lista_territorio = paginator.get_page(page_number) # <--- Variable definida
+    lista_territorio = paginator.get_page(page_number)
 
     context = {
         'total_target': meta_total_visitas,
         'visited': total_visitas_realizadas,
         'remaining': pendientes_totales,
         'porcentaje': porcentaje,
-        'lista_territorio': lista_territorio, # Ahora Python siempre la encontrará
+        'lista_territorio': lista_territorio,
         'hoy': hoy,
     }
     
     return render(request, 'visitas/cobertura.html', context)
-
-
-
+   
 
 # ==========================================
 # 1. NUEVA VISITA (Guarda en RegistroVisita)
@@ -487,13 +515,29 @@ def mi_agenda_view(request):
     for v in lista_espontaneas:
         v.estado = 'Realizada'
 
-    # C) Fusión y Orden: Queremos que lo más RECIENTE aparezca primero
-    # Ordenamos por fecha_hora de forma descendente (el signo '-' antes de la fecha)
-    proximas_visitas = sorted(
+    # C) Juntamos ambas listas y ordenamos de más nueva a más antigua
+    todas_las_visitas = sorted(
         chain(lista_agendadas, lista_espontaneas),
         key=attrgetter('fecha_hora'),
-        reverse=True # <--- Esto pone lo más nuevo arriba
-    )[:20] # Mostramos los últimos 30 movimientos
+        reverse=True
+    )[:20] # Traemos los últimos 20 movimientos para agrupar
+
+    # D) LA MAGIA: Agrupamos por Institución (Diccionario)
+    visitas_agrupadas = {}
+    for visita in todas_las_visitas:
+        inst_id = visita.institucion.id
+        if inst_id not in visitas_agrupadas:
+            visitas_agrupadas[inst_id] = {
+                'institucion': visita.institucion,
+                'visitas': [], # Aquí guardaremos la lista del historial
+                'conteo': 0,
+                'ultima_fecha': visita.fecha_hora # Para mostrar cuándo fue la última
+            }
+        visitas_agrupadas[inst_id]['visitas'].append(visita)
+        visitas_agrupadas[inst_id]['conteo'] += 1
+
+    # Convertimos el diccionario en una lista para enviarla al HTML
+    proximas_visitas = list(visitas_agrupadas.values())
 
     contexto = {
         'fecha_actual': fecha_seleccionada,

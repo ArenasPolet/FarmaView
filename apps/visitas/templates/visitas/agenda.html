@@ -167,56 +167,115 @@
                 
                 <div class="proximas-visitas-container ps-1 ps-md-2">
                     <h5 class="fw-bold text-dark mb-4">
-                        <i class="bi bi-calendar-week text-primary me-2"></i>{% translate "Próximas Visitas Agendadas" %}
+                        <i class="bi bi-calendar-week text-primary me-2"></i>{% translate "Visitas Agendadas" %}
                     </h5>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle border rounded-3 overflow-hidden shadow-sm">
-                            <thead class="table-light text-secondary" style="font-size: 0.85rem;">
-                                <tr>
-                                    <th class="py-3 px-3">Fecha y Hora</th>
-                                    <th class="py-3 px-3">Institución</th>
-                                    <th class="py-3 px-3">Tipo</th>
-                                    <th class="py-3 px-3 text-end">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for proxima in proximas_visitas %}
-                                <tr>
-                                    <td class="px-3">
-                                        <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ proxima.fecha_hora|date:"d M, Y" }}</div>
-                                        <div class="text-muted small"><i class="bi bi-clock"></i> {{ proxima.fecha_hora|date:"H:i" }}</div>
-                                    </td>
-                                    <td class="px-3">
-                                        <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ proxima.institucion.nombre|title }}</div>
-                                        {% if request.user.is_superuser or request.user.es_gerente %}
-                                            <div class="small text-muted">
-                                                <i class="bi bi-person-badge"></i> Rep: {{ proxima.representante.get_full_name|default:proxima.representante.username }}
+
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-0">
+                        <div class="d-none d-md-flex bg-light text-secondary border-bottom px-4 py-3" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                            <div class="col-5">Institución</div>
+                            <div class="col-3 text-center">Última Actividad</div>
+                            <div class="col-4 text-end pe-4">Historial</div>
+                        </div>
+
+                        <div class="d-flex flex-column">
+                            {% for grupo in proximas_visitas %}
+                            
+                            <div class="fila-acordeon border-bottom text-dark" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#historial-{{ grupo.institucion.id }}" 
+                                aria-expanded="false">
+                                
+                                <div class="d-flex flex-column flex-md-row align-items-md-center px-3 py-3 px-md-4 gap-2 gap-md-0">
+                                    
+                                    <div class="col-12 col-md-5 d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 42px; height: 42px;">
+                                            <i class="bi bi-building fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ grupo.institucion.nombre|title }}</div>
+                                            <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                                                {% if request.user.is_superuser or request.user.es_gerente %}
+                                                    <i class="bi bi-person-badge text-primary opacity-75"></i> Rep: {{ grupo.institucion.representante.get_full_name|default:grupo.institucion.representante.username }}
+                                                {% else %}
+                                                    ID: {{ grupo.institucion.rut }}
+                                                {% endif %}
                                             </div>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-3">
-                                        <span class="badge bg-warning text-dark bg-opacity-25 border border-warning">
-                                            {{ proxima.tipo_gestion|default:"General" }}
-                                        </span>
-                                    </td>
-                                    <td class="px-3 text-end">
-                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
-                                            Ver detalle
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">
-                                        <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
-                                        No tienes más visitas agendadas a futuro.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3 d-flex justify-content-between justify-content-md-center align-items-center mt-2 mt-md-0">
+                                        <span class="d-md-none text-muted small fw-bold"><i class="bi bi-clock-history me-1"></i>Última Actividad:</span>
+                                        <div class="text-end text-md-center">
+                                            <div class="fw-medium text-dark" style="font-size: 0.9rem;">{{ grupo.ultima_fecha|date:"d M, Y" }}</div>
+                                            <div class="text-muted small" style="font-size: 0.75rem;">{{ grupo.ultima_fecha|date:"H:i" }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4 d-flex justify-content-between justify-content-md-end align-items-center mt-2 mt-md-0 pt-2 pt-md-0 border-top border-md-0 border-light">
+                                        <span class="d-md-none text-muted small fw-bold"><i class="bi bi-journal-text me-1"></i>Registros:</span>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="badge bg-info bg-opacity-10 text-info-emphasis border border-info border-opacity-25 rounded-pill px-3 py-2 fw-semibold shadow-sm">
+                                                <i class="bi bi-stack me-1"></i> {{ grupo.conteo }} Visita{{ grupo.conteo|pluralize }}
+                                            </span>
+                                            <i class="bi bi-chevron-down fs-5 icono-flecha transition-transform text-muted"></i>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <div class="collapse" id="historial-{{ grupo.institucion.id }}">
+                                <div class="p-3 p-md-4 border-bottom border-primary border-opacity-10 shadow-inner" style="background-color: #f8fafc;">
+                                    <h6 class="fw-bold text-secondary mb-4 small text-uppercase" style="letter-spacing: 1px;">
+                                        <i class="bi bi-activity me-1"></i> Historial Detallado de Gestiones
+                                    </h6>
+                                    
+                                    <div class="d-flex flex-column gap-3 ms-2 ms-md-3" style="border-left: 2px solid #cbd5e1; padding-left: 15px;">
+                                        {% for visita in grupo.visitas %}
+                                        <div class="position-relative">
+                                            <div class="position-absolute bg-white border border-2 border-primary rounded-circle" style="width: 14px; height: 14px; left: -23px; top: 6px;"></div>
+                                            
+                                            <div class="bg-white p-3 rounded-3 shadow-sm border border-light transition-hover w-100">
+                                                <div class="d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row mb-2 gap-2">
+                                                    <div>
+                                                        <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                                                            <i class="bi bi-calendar2-event text-primary me-1"></i> {{ visita.fecha_hora|date:"d M, Y" }}
+                                                        </span>
+                                                        <span class="text-muted ms-0 ms-md-2 small d-block d-md-inline mt-1 mt-md-0">
+                                                            <i class="bi bi-clock me-1"></i> {{ visita.fecha_hora|date:"H:i" }}
+                                                        </span>
+                                                    </div>
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-3 py-1 mt-1 mt-md-0">
+                                                        {{ visita.tipo_gestion|default:"General" }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="mt-2 p-2 rounded-2" style="background-color: #f1f5f9; font-size: 0.85rem; border-left: 3px solid #94a3b8;">
+                                                    {% if visita.observaciones %}
+                                                        <span class="text-secondary">
+                                                            <strong>Obs:</strong> {{ visita.observaciones }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted fst-italic">Sin observaciones registradas.</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% empty %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                                No tienes visitas registradas.
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
+                                        
+                    
                 </div>
                 </div> </div>
     </div>
